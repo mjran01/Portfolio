@@ -1,33 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mark // Full-Stack Developer</title>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap"
-    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/css/style.css" />
 </head>
-
 <body>
 
   <!-- CURSOR -->
   <div id="cursor"></div>
   <div id="cursor-dot"></div>
+  <div id="cursor-trail-container"></div>
 
   <!-- MATRIX RAIN -->
   <canvas id="matrix-canvas"></canvas>
 
+  <!-- FLOATING ALIEN VIDEO — fixed, always dancing -->
+  <div id="alien-wrap">
+    <video id="alien-video" src="assets/video/alien.webm" autoplay loop muted playsinline></video>
+    <div id="alien-glow"></div>
+  </div>
+
+  <div id="alien-wrap">
+    <video id="alien-video" src="assets/video/alien.webm" autoplay loop muted playsinline></video>
+    <div id="alien-glow"></div>
+  </div>
+
+  <div id="alien-wrap">
+    <video id="alien-video" src="assets/video/alien.webm" autoplay loop muted playsinline></video>
+    <div id="alien-glow"></div>
+  </div>
+
   <!-- HEADER -->
-  <header>
+  <header id="site-header">
     <div class="header-logo"><span>Mark Jezreel</span> Martinez</div>
     <nav class="header-nav">
       <a href="#home">Home</a>
       <a href="#about">About</a>
       <a href="#projects">Projects</a>
       <a href="#tech">Stack</a>
+      <a href="#blog">Blog</a>
       <a href="#contact">Contact</a>
     </nav>
     <div class="header-status">
@@ -42,16 +56,16 @@
   <!-- SIDEBAR -->
   <nav id="sidebar">
     <div class="sidebar-section-label">Navigation</div>
-    <a href="#home" class="sidebar-link active"><span class="icon">⌂</span> Home</a>
-    <a href="#about" class="sidebar-link"><span class="icon">◈</span> About Me</a>
+    <a href="#home"     class="sidebar-link active"><span class="icon">⌂</span> Home</a>
+    <a href="#about"    class="sidebar-link"><span class="icon">◈</span> About Me</a>
     <a href="#projects" class="sidebar-link"><span class="icon">◻</span> Projects</a>
-    <a href="#tech" class="sidebar-link"><span class="icon">⬡</span> Tech Stack</a>
-    <a href="#contact" class="sidebar-link"><span class="icon">✉</span> Contact</a>
-
+    <a href="#tech"     class="sidebar-link"><span class="icon">⬡</span> Tech Stack</a>
+    <a href="#blog"     class="sidebar-link"><span class="icon">✦</span> Blog</a>
+    <a href="#contact"  class="sidebar-link"><span class="icon">✉</span> Contact</a>
     <div class="sidebar-section-label">System</div>
-    <a href="assets/images/MarkJezreelMartinez(2025).pdf" target="_blank" class="sidebar-link"><span class="icon">▶</span> Resume.pdf</a>
-   
-
+    <a href="assets/images/MarkJezreelMartinez(2025).pdf" target="_blank" class="sidebar-link">
+      <span class="icon">▶</span> Resume.pdf
+    </a>
     <div class="sidebar-footer">
       <div>Mark Jezreel Martinez</div>
       <div style="color:var(--green);margin-top:.3rem;">Fullstack Developer</div>
@@ -66,15 +80,21 @@
     <section id="home">
       <canvas id="particle-canvas"></canvas>
 
-      <div class="banner reveal">
+      <!-- parallax depth layers -->
+      <div class="parallax-layer" data-depth="0.1" style="position:absolute;inset:0;pointer-events:none;z-index:0;">
+        <div class="hex-bg" style="opacity:.06;"></div>
+      </div>
+      <div class="parallax-layer" data-depth="0.25" style="position:absolute;inset:0;pointer-events:none;z-index:0;">
+        <div class="stars-field" id="stars1"></div>
+      </div>
+
+      <div class="banner reveal" data-parallax-card>
         <div class="banner-corner tl"></div>
         <div class="banner-corner tr"></div>
         <div class="banner-corner bl"></div>
         <div class="banner-corner br"></div>
+        <div class="banner-sweep"></div>
 
-        <!-- AVATAR PLACEHOLDER -->
-
-        <!-- REPLACE with this: -->
         <img src="assets/images/profile_picture.jpg" alt="Mark" class="banner-avatar" />
 
         <div class="banner-info">
@@ -84,58 +104,71 @@
           <div id="typewriter"></div>
           <div class="banner-cta">
             <a href="#projects" class="btn btn-primary">View Projects</a>
-            <a href="#contact" class="btn btn-outline">Initiate Contact</a>
+            <a href="#contact"  class="btn btn-outline">Initiate Contact</a>
           </div>
         </div>
       </div>
 
       <!-- OBJECTIVES -->
-      <div>
-        <div class="section-tag">Mission Parameters</div>
-        <h2 class="section-title">Objectives</h2>
-        <div class="objectives-grid">
-          <div class="obj-card reveal" style="animation-delay:.1s">
-            <div class="obj-icon">⚙️</div>
-            <div class="obj-title">Build Scalable Systems</div>
-            <div class="obj-desc">Engineer robust, maintainable backends that handle real-world complexity — from LGU
-              portals to market-monitoring platforms.</div>
-          </div>
-          <div class="obj-card reveal" style="animation-delay:.2s">
-            <div class="obj-icon">🖥️</div>
-            <div class="obj-title">Craft Intuitive UIs</div>
-            <div class="obj-desc">Design interfaces that feel natural to the user — bilingual, accessible, and
-              performant across every device.</div>
-          </div>
-          <div class="obj-card reveal" style="animation-delay:.3s">
-            <div class="obj-icon">🔒</div>
-            <div class="obj-title">Secure by Default</div>
-            <div class="obj-desc">Bake security into every layer. Auth, role-based access, data sanitization — not
-              afterthoughts but foundations.</div>
-          </div>
-          <div class="obj-card reveal" style="animation-delay:.4s">
-            <div class="obj-icon">🚀</div>
-            <div class="obj-title">Deliver Real Impact</div>
-            <div class="obj-desc">Ship solutions that serve real people — government employees, market vendors,
-              community members in Valenzuela City.</div>
+        <div>
+          <div class="section-tag">Core Objectives</div>
+          <h2 class="section-title">Objectives</h2>
+
+          <div class="objectives-grid">
+
+            <div class="obj-card reveal" style="animation-delay:.1s">
+              <div class="obj-icon">⚙️</div>
+              <div class="obj-title">Build Enterprise-Ready Systems</div>
+              <div class="obj-desc">
+                Develop scalable, high-performance platforms designed to support growing businesses, complex operations, and real-world demands across multiple industries.
+              </div>
+            </div>
+
+            <div class="obj-card reveal" style="animation-delay:.2s">
+              <div class="obj-icon">🖥️</div>
+              <div class="obj-title">Create Exceptional User Experiences</div>
+              <div class="obj-desc">
+                Design modern, intuitive, and responsive interfaces that improve usability, strengthen engagement, and deliver seamless digital experiences.
+              </div>
+            </div>
+
+            <div class="obj-card reveal" style="animation-delay:.3s">
+              <div class="obj-icon">🔒</div>
+              <div class="obj-title">Deliver Secure & Reliable Solutions</div>
+              <div class="obj-desc">
+                Build software with security, maintainability, and long-term stability at its core — ensuring dependable systems for organizations and users alike.
+              </div>
+            </div>
+
+            <div class="obj-card reveal" style="animation-delay:.4s">
+              <div class="obj-icon">🚀</div>
+              <div class="obj-title">Drive Digital Innovation</div>
+              <div class="obj-desc">
+                Transform ideas into impactful digital products that help businesses, institutions, and public organizations stay competitive in a rapidly evolving world.
+              </div>
+            </div>
+
           </div>
         </div>
-      </div>
-
 
     </section>
 
     <!-- ── ABOUT ── -->
     <section id="about">
+      <!-- parallax bg layer -->
+      <div class="parallax-layer" data-depth="0.15" style="position:absolute;inset:0;pointer-events:none;z-index:0;">
+        <div class="circuit-bg"></div>
+      </div>
+
       <div class="section-tag">System Profile</div>
       <h2 class="section-title">About Me</h2>
 
       <div class="about-layout">
-        <div class="about-bio reveal">
+        <div class="about-bio reveal from-left">
           <p>
             I'm a <span class="green">full-stack developer</span> building digital infrastructure for local government
             in <span class="green">Valenzuela City, Philippines</span>. I work across the entire stack — designing
-            databases, writing APIs, crafting interfaces — with a bias toward clarity and systems that <span
-              class="green">actually work</span>.
+            databases, writing APIs, crafting interfaces — with a bias toward clarity and systems that <span class="green">actually work</span>.
           </p>
           <p>
             My current focus is on <span class="green">civic tech</span>: modernizing how LGU offices manage data,
@@ -143,9 +176,8 @@
             systems, and custom admin dashboards — all production-grade.
           </p>
           <p>
-            Beyond government work, I take on freelance projects ranging from <span class="green">WordPress
-              builds</span> to custom booking systems. I write clean, well-commented code because future-me is always
-            reading it.
+            Beyond government work, I take on freelance projects ranging from <span class="green">WordPress builds</span>
+            to custom booking systems. I write clean, well-commented code because future-me is always reading it.
           </p>
 
           <div class="about-stats">
@@ -168,7 +200,7 @@
           </div>
         </div>
 
-        <div class="terminal-box reveal">
+        <div class="terminal-box reveal from-right">
           <div class="terminal-bar">
             <div class="terminal-dot td1"></div>
             <div class="terminal-dot td2"></div>
@@ -182,6 +214,10 @@
 
     <!-- ── PROJECTS ── -->
     <section id="projects">
+      <div class="parallax-layer" data-depth="0.08" style="position:absolute;inset:0;pointer-events:none;z-index:0;">
+        <div class="grid-bg"></div>
+      </div>
+
       <div class="section-tag">Deployed Systems</div>
       <h2 class="section-title">Projects</h2>
 
@@ -198,186 +234,124 @@
             <a href="https://shangpropertiesleasing.com" target="_blank">
               <img src="assets/images/101.png" alt="Shang Properties Leasing" class="project-thumb" />
             </a>
-
             <div class="project-body">
               <span class="project-tag">Real Estate · Leasing</span>
-
               <div class="project-title">Shang Properties Leasing</div>
-
-              <div class="project-desc">
-                A modern informational website developed for Shang Properties Leasing, designed to showcase premium
-                leasing spaces, property information, business accessibility, and a professional online presence for
-                potential clients and tenants.
-              </div>
-
+              <div class="project-desc">A modern informational website for Shang Properties Leasing, showcasing premium leasing spaces, property information, and a professional online presence for potential clients and tenants.</div>
               <div class="project-stack">
-                <span class="stack-pill">HTML</span>
-                <span class="stack-pill">CSS</span>
-                <span class="stack-pill">JavaScript</span>
-                <span class="stack-pill">Responsive Design</span>
-                <span class="stack-pill">Custom Wordpress</span>
+                <span class="stack-pill">HTML</span><span class="stack-pill">CSS</span>
+                <span class="stack-pill">JavaScript</span><span class="stack-pill">Custom WordPress</span>
               </div>
             </div>
           </div>
-
-          
-          <div class="project-card"> <a href="https://tmo.valenzuela.gov.ph" target="_blank"> <img
-                src="assets/images/103.png" alt="PTDID Portal" class="project-thumb" /> </a>
-            <div class="project-body"> <span class="project-tag">Gov · LGU</span>
-              <div class="project-title">PTDID Portal</div>
-              <div class="project-desc">Public Transportation Drivers Information Database for Valenzuela City TMO.
-                Multi-step driver registration, QR codes, admin dashboard, and CSV export.</div>
-              <div class="project-stack"> 
-                <span class="stack-pill">SvelteKit</span> 
-                <span class="stack-pill">Go/Gin</span>
-                   <span class="stack-pill">MySQL</span> 
-                   <span class="stack-pill">GORM</span>
-               </div>
-            </div>
-          </div>
-
-        
 
           <div class="project-card">
-          <a href="https://vibetribenotions.com" target="_blank">  <img src="assets/images/104.png" alt="PTDID Portal" class="project-thumb" /> </a> 
+            <a href="https://tmo.valenzuela.gov.ph" target="_blank">
+              <img src="assets/images/103.png" alt="PTDID Portal" class="project-thumb" />
+            </a>
+            <div class="project-body">
+              <span class="project-tag">Gov · LGU</span>
+              <div class="project-title">PTDID Portal</div>
+              <div class="project-desc">Public Transportation Drivers Information Database for Valenzuela City TMO. Multi-step driver registration, QR codes, admin dashboard, and CSV export.</div>
+              <div class="project-stack">
+                <span class="stack-pill">SvelteKit</span><span class="stack-pill">Go/Gin</span>
+                <span class="stack-pill">MySQL</span><span class="stack-pill">GORM</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="project-card">
+            <a href="https://vibetribenotions.com" target="_blank">
+              <img src="assets/images/104.png" alt="Vibe Tribe Notions" class="project-thumb" />
+            </a>
             <div class="project-body">
               <span class="project-tag">Freelance · Wellness</span>
               <div class="project-title">Vibe Tribe Notions</div>
-              <div class="project-desc">Full custom WordPress site for a spiritual wellness practitioner. Custom booking
-                system, dynamic product shop with cart, email checkout, and AJAX-powered admin panel.</div>
+              <div class="project-desc">Full custom WordPress site for a spiritual wellness practitioner. Custom booking system, dynamic product shop with cart, email checkout, and AJAX-powered admin panel.</div>
               <div class="project-stack">
-                <span class="stack-pill">Custom WordPress</span>
-                <span class="stack-pill">PHP</span>
-                <span class="stack-pill">AJAX</span>
-                <span class="stack-pill">MySQL</span>
+                <span class="stack-pill">Custom WordPress</span><span class="stack-pill">PHP</span>
+                <span class="stack-pill">AJAX</span><span class="stack-pill">MySQL</span>
               </div>
             </div>
           </div>
 
           <div class="project-card">
-              <a href="https://www.philbritish.com/" target="_blank">
-                <img src="assets/images/102.png" alt="PhilBritish Insurance" class="project-thumb" />
-              </a>
-
-              <div class="project-body">
-                <span class="project-tag">Insurance · Corporate</span>
-
-                <div class="project-title">PhilBritish Insurance</div>
-
-                <div class="project-desc">
-                  A professional corporate website developed for PhilBritish Insurance, showcasing non-life insurance services, claims information, company profiles, customer support resources, and responsive business-focused design.
-                </div>
-
-                <div class="project-stack">
-                  <span class="stack-pill">WordPress</span>
-                  <span class="stack-pill">PHP</span>
-                  <span class="stack-pill">Responsive Design</span>
-                  <span class="stack-pill">UI/UX</span>
-                </div>
+            <a href="https://www.philbritish.com/" target="_blank">
+              <img src="assets/images/102.png" alt="PhilBritish Insurance" class="project-thumb" />
+            </a>
+            <div class="project-body">
+              <span class="project-tag">Insurance · Corporate</span>
+              <div class="project-title">PhilBritish Insurance</div>
+              <div class="project-desc">A professional corporate website for PhilBritish Insurance, showcasing non-life insurance services, claims information, and responsive business-focused design.</div>
+              <div class="project-stack">
+                <span class="stack-pill">WordPress</span><span class="stack-pill">PHP</span>
+                <span class="stack-pill">Responsive Design</span><span class="stack-pill">UI/UX</span>
               </div>
+            </div>
           </div>
 
           <div class="project-card">
             <a href="https://jinxi.blitzworx2.com/" target="_blank">
               <img src="assets/images/105.png" alt="JPDC Beta Version" class="project-thumb" />
             </a>
-
             <div class="project-body">
               <span class="project-tag">Corporate · Brand Website</span>
-
               <div class="project-title">JPDC (Beta Version)</div>
-
-              <div class="project-desc">
-                A modern WordPress website developed for JPDC, featuring clean layouts, responsive design, brand-focused presentation, and a professional digital presence tailored for organizational visibility.
-              </div>
-
+              <div class="project-desc">A modern WordPress website for JPDC featuring clean layouts, responsive design, brand-focused presentation, and a professional digital presence.</div>
               <div class="project-stack">
-                <span class="stack-pill">WordPress</span>
-                <span class="stack-pill">PHP</span>
-                <span class="stack-pill">Responsive Design</span>
-                <span class="stack-pill">UI/UX</span>
+                <span class="stack-pill">WordPress</span><span class="stack-pill">PHP</span>
+                <span class="stack-pill">Responsive Design</span><span class="stack-pill">UI/UX</span>
               </div>
             </div>
           </div>
-
 
           <div class="project-card">
             <a href="https://cvskinshop.com" target="_blank">
               <img src="assets/images/106.jpg" alt="CV Skin Shop" class="project-thumb" />
             </a>
-
             <div class="project-body">
               <span class="project-tag">Beauty · E-Commerce</span>
-
               <div class="project-title">CV Skin Shop</div>
-
-              <div class="project-desc">
-                A beauty and skincare e-commerce website developed for CV Skin Shop by Cathy Valencia, featuring product showcases, online shopping functionality, responsive design, and a clean customer-focused experience.
-              </div>
-
+              <div class="project-desc">A beauty and skincare e-commerce website for CV Skin Shop, featuring product showcases, online shopping, and a clean customer-focused experience.</div>
               <div class="project-stack">
-                <span class="stack-pill">WordPress</span>
-                <span class="stack-pill">WooCommerce</span>
-                <span class="stack-pill">PHP</span>
-                <span class="stack-pill">Responsive Design</span>
+                <span class="stack-pill">WordPress</span><span class="stack-pill">WooCommerce</span>
+                <span class="stack-pill">PHP</span><span class="stack-pill">Responsive Design</span>
               </div>
             </div>
           </div>
-
 
           <div class="project-card">
             <a href="https://www.lynkxs.com/" target="_blank">
               <img src="assets/images/107.png" alt="LynkXS" class="project-thumb" />
             </a>
-
             <div class="project-body">
               <span class="project-tag">B2B · Global Marketplace</span>
-
               <div class="project-title">LynkXS</div>
-
-              <div class="project-desc">
-                A hybrid Laravel and WordPress platform developed for LynkXS, featuring a modern B2B marketplace experience, dynamic content management, responsive business-focused design, and scalable web functionality for global trade and sourcing services.
-              </div>
-
+              <div class="project-desc">A hybrid Laravel and WordPress platform for LynkXS, featuring a modern B2B marketplace experience and scalable web functionality for global trade and sourcing services.</div>
               <div class="project-stack">
-                <span class="stack-pill">Laravel</span>
-                <span class="stack-pill">WordPress</span>
-                <span class="stack-pill">PHP</span>
-                <span class="stack-pill">MySQL</span>
+                <span class="stack-pill">Laravel</span><span class="stack-pill">WordPress</span>
+                <span class="stack-pill">PHP</span><span class="stack-pill">MySQL</span>
               </div>
             </div>
           </div>
-
 
           <div class="project-card">
             <a href="https://play.google.com/store/apps/details?id=com.myoptimind.ecoikot" target="_blank">
               <img src="assets/images/108.png" alt="Eco-Ikot App" class="project-thumb" />
             </a>
-
             <div class="project-body">
               <span class="project-tag">Mobile App · Sustainability</span>
-
               <div class="project-title">Eco-Ikot App</div>
-
-              <div class="project-desc">
-                Backend development for the Eco-Ikot mobile application using Laravel, focused on API development, database management, authentication, and scalable backend services supporting sustainability-focused mobile features.
-              </div>
-
+              <div class="project-desc">Backend development for the Eco-Ikot mobile application using Laravel — API development, database management, authentication, and scalable backend services.</div>
               <div class="project-stack">
-                <span class="stack-pill">Laravel</span>
-                <span class="stack-pill">REST API</span>
-                <span class="stack-pill">PHP</span>
-                <span class="stack-pill">MySQL</span>
+                <span class="stack-pill">Laravel</span><span class="stack-pill">REST API</span>
+                <span class="stack-pill">PHP</span><span class="stack-pill">MySQL</span>
               </div>
             </div>
           </div>
 
-
-
         </div>
       </div>
-
-
     </section>
 
     <!-- ── TECH STACK ── -->
@@ -387,182 +361,122 @@
       <h2 class="section-title">Technology Stack</h2>
 
       <div class="stack-tabs">
-        <button class="stack-tab active" onclick="showStack('backend', this)">⚙ Backend</button>
-        <button class="stack-tab" onclick="showStack('frontend', this)">🖥 Frontend</button>
-        <button class="stack-tab" onclick="showStack('database', this)">🗄 Database</button>
-        <button class="stack-tab" onclick="showStack('tools', this)">🔧 Tools</button>
+        <button class="stack-tab active" onclick="showStack('backend',  this)">⚙ Backend</button>
+        <button class="stack-tab"        onclick="showStack('frontend', this)">🖥 Frontend</button>
+        <button class="stack-tab"        onclick="showStack('database', this)">🗄 Database</button>
+        <button class="stack-tab"        onclick="showStack('tools',    this)">🔧 Tools</button>
       </div>
 
       <div class="stack-panel active" id="stack-backend">
-        <div class="tech-card reveal">
-          <div class="tech-icon">🐹</div>
-          <div class="tech-name">Go / Gin</div>
-          <div class="tech-level">
-            <div class="tech-level-fill" style="width:88%"></div>
-          </div>
-        </div>
-        <div class="tech-card reveal">
-          <div class="tech-icon">🐘</div>
-          <div class="tech-name">PHP/ Laravel</div>
-          <div class="tech-level">
-            <div class="tech-level-fill" style="width:80%"></div>
-          </div>
-        </div>
-        <div class="tech-card reveal">
-          <div class="tech-icon">🟩</div>
-          <div class="tech-name">Node.js / Express.js</div>
-          <div class="tech-level">
-            <div class="tech-level-fill" style="width:78%"></div>
-          </div>
-        </div>
-        <div class="tech-card reveal">
-          <div class="tech-icon">🔌</div>
-          <div class="tech-name">REST APIs</div>
-          <div class="tech-level">
-            <div class="tech-level-fill" style="width:92%"></div>
-          </div>
-        </div>
-        <div class="tech-card reveal">
-          <div class="tech-icon">🔗</div>
-          <div class="tech-name">GORM</div>
-          <div class="tech-level">
-            <div class="tech-level-fill" style="width:75%"></div>
-          </div>
-        </div>
-        <div class="tech-card reveal">
-          <div class="tech-icon">🏗</div>
-          <div class="tech-name">WordPress CMS</div>
-          <div class="tech-level">
-            <div class="tech-level-fill" style="width:82%"></div>
-          </div>
-        </div>
+        <div class="tech-card reveal"><div class="tech-icon">🐹</div><div class="tech-name">Go / Gin</div><div class="tech-level"><div class="tech-level-fill" style="width:88%"></div></div></div>
+        <div class="tech-card reveal"><div class="tech-icon">🐘</div><div class="tech-name">PHP / Laravel</div><div class="tech-level"><div class="tech-level-fill" style="width:80%"></div></div></div>
+        <div class="tech-card reveal"><div class="tech-icon">🟩</div><div class="tech-name">Node.js / Express</div><div class="tech-level"><div class="tech-level-fill" style="width:78%"></div></div></div>
+        <div class="tech-card reveal"><div class="tech-icon">🔌</div><div class="tech-name">REST APIs</div><div class="tech-level"><div class="tech-level-fill" style="width:92%"></div></div></div>
+        <div class="tech-card reveal"><div class="tech-icon">🔗</div><div class="tech-name">GORM</div><div class="tech-level"><div class="tech-level-fill" style="width:75%"></div></div></div>
+        <div class="tech-card reveal"><div class="tech-icon">🏗</div><div class="tech-name">WordPress CMS</div><div class="tech-level"><div class="tech-level-fill" style="width:82%"></div></div></div>
       </div>
 
       <div class="stack-panel" id="stack-frontend">
-        <div class="tech-card reveal">
-          <div class="tech-icon">⚡</div>
-          <div class="tech-name">SvelteKit</div>
-          <div class="tech-level">
-            <div class="tech-level-fill" style="width:90%"></div>
-          </div>
-        </div>
-        <div class="tech-card reveal">
-          <div class="tech-icon">⚛</div>
-          <div class="tech-name">React & Vue JS</div>
-          <div class="tech-level">
-            <div class="tech-level-fill" style="width:85%"></div>
-          </div>
-        </div>
-        <div class="tech-card reveal">
-          <div class="tech-icon">🎨</div>
-          <div class="tech-name">HTML / CSS</div>
-          <div class="tech-level">
-            <div class="tech-level-fill" style="width:95%"></div>
-          </div>
-        </div>
-        <div class="tech-card reveal">
-          <div class="tech-icon">🟨</div>
-          <div class="tech-name">JavaScript</div>
-          <div class="tech-level">
-            <div class="tech-level-fill" style="width:88%"></div>
-          </div>
-        </div>
-        <div class="tech-card reveal">
-          <div class="tech-icon">📱</div>
-          <div class="tech-name">Responsive Design</div>
-          <div class="tech-level">
-            <div class="tech-level-fill" style="width:91%"></div>
-          </div>
-        </div>
-        <div class="tech-card reveal">
-          <div class="tech-icon">🖨</div>
-          <div class="tech-name">Print/PDF APIs</div>
-          <div class="tech-level">
-            <div class="tech-level-fill" style="width:72%"></div>
-          </div>
-        </div>
+        <div class="tech-card reveal"><div class="tech-icon">⚡</div><div class="tech-name">SvelteKit</div><div class="tech-level"><div class="tech-level-fill" style="width:90%"></div></div></div>
+        <div class="tech-card reveal"><div class="tech-icon">⚛</div><div class="tech-name">React & Vue JS</div><div class="tech-level"><div class="tech-level-fill" style="width:85%"></div></div></div>
+        <div class="tech-card reveal"><div class="tech-icon">🎨</div><div class="tech-name">HTML / CSS</div><div class="tech-level"><div class="tech-level-fill" style="width:95%"></div></div></div>
+        <div class="tech-card reveal"><div class="tech-icon">🟨</div><div class="tech-name">JavaScript</div><div class="tech-level"><div class="tech-level-fill" style="width:88%"></div></div></div>
+        <div class="tech-card reveal"><div class="tech-icon">📱</div><div class="tech-name">Responsive Design</div><div class="tech-level"><div class="tech-level-fill" style="width:91%"></div></div></div>
+        <div class="tech-card reveal"><div class="tech-icon">🖨</div><div class="tech-name">Print/PDF APIs</div><div class="tech-level"><div class="tech-level-fill" style="width:72%"></div></div></div>
       </div>
 
       <div class="stack-panel" id="stack-database">
-        <div class="tech-card reveal">
-          <div class="tech-icon">🐬</div>
-          <div class="tech-name">MySQL</div>
-          <div class="tech-level">
-            <div class="tech-level-fill" style="width:90%"></div>
-          </div>
-        </div>
-        <div class="tech-card reveal">
-          <div class="tech-icon">📊</div>
-          <div class="tech-name">SQL Design</div>
-          <div class="tech-level">
-            <div class="tech-level-fill" style="width:85%"></div>
-          </div>
-        </div>
-        <div class="tech-card reveal">
-          <div class="tech-icon">🔍</div>
-          <div class="tech-name">Query Optimization</div>
-          <div class="tech-level">
-            <div class="tech-level-fill" style="width:78%"></div>
-          </div>
-        </div>
+        <div class="tech-card reveal"><div class="tech-icon">🐬</div><div class="tech-name">MySQL</div><div class="tech-level"><div class="tech-level-fill" style="width:90%"></div></div></div>
+        <div class="tech-card reveal"><div class="tech-icon">📊</div><div class="tech-name">SQL Design</div><div class="tech-level"><div class="tech-level-fill" style="width:85%"></div></div></div>
+        <div class="tech-card reveal"><div class="tech-icon">🔍</div><div class="tech-name">Query Optimization</div><div class="tech-level"><div class="tech-level-fill" style="width:78%"></div></div></div>
       </div>
 
       <div class="stack-panel" id="stack-tools">
-        <div class="tech-card reveal">
-          <div class="tech-icon">🐙</div>
-          <div class="tech-name">Git / GitHub</div>
-          <div class="tech-level">
-            <div class="tech-level-fill" style="width:88%"></div>
+        <div class="tech-card reveal"><div class="tech-icon">🐙</div><div class="tech-name">Git / GitHub</div><div class="tech-level"><div class="tech-level-fill" style="width:88%"></div></div></div>
+        <div class="tech-card reveal"><div class="tech-icon">🐧</div><div class="tech-name">Linux / Bash</div><div class="tech-level"><div class="tech-level-fill" style="width:75%"></div></div></div>
+        <div class="tech-card reveal"><div class="tech-icon">🐳</div><div class="tech-name">Docker</div><div class="tech-level"><div class="tech-level-fill" style="width:65%"></div></div></div>
+        <div class="tech-card reveal"><div class="tech-icon">📮</div><div class="tech-name">Postman / REST</div><div class="tech-level"><div class="tech-level-fill" style="width:90%"></div></div></div>
+      </div>
+    </section>
+
+    <!-- ── BLOG ── -->
+    <section id="blog" style="min-height:auto; padding-bottom:5rem;">
+      <div class="hex-bg"></div>
+      <div class="parallax-layer" data-depth="0.12" style="position:absolute;inset:0;pointer-events:none;z-index:0;">
+        <div class="grid-bg" style="opacity:.04;"></div>
+      </div>
+
+      <div class="section-tag">Field Logs // On Duty</div>
+      <h2 class="section-title">Blog</h2>
+
+      <div class="blog-grid">
+
+        <div class="blog-card reveal">
+          <div class="blog-img-wrap">
+            <img src="assets/images/blog1.jpg" alt="PTDID Integration Day" class="blog-img" />
+            <div class="blog-scan"></div>
+            <div class="blog-meta">
+              <span class="blog-date">2026-05-05</span>
+              <span class="blog-category">Deployment</span>
+            </div>
+          </div>
+          <div class="blog-body">
+            <div class="blog-title">Go-Live Day: PTDID Portal at Valenzuela TMO</div>
+            <div class="blog-desc">Walking into the One Stop Shop in One Mall by Traffic Management Office with the system finally running on their machines — watching officers register drivers for the first time in real-time. This is why I build what I build.</div>
           </div>
         </div>
-        <div class="tech-card reveal">
-          <div class="tech-icon">🐧</div>
-          <div class="tech-name">Linux / Bash</div>
-          <div class="tech-level">
-            <div class="tech-level-fill" style="width:75%"></div>
+
+        
+
+        <div class="blog-card reveal" style="animation-delay:.2s">
+          <div class="blog-img-wrap">
+            <img src="assets/images/blog2.jpg" alt="Training Session" class="blog-img" />
+            <div class="blog-scan"></div>
+            <div class="blog-meta">
+              <span class="blog-date">2026-04-27</span>
+              <span class="blog-category">Training</span>
+            </div>
+          </div>
+          <div class="blog-body">
+            <div class="blog-title">Training Government Staff on the New System</div>
+            <div class="blog-desc">Running a hands-on walkthrough with TMO employees — showing them how to register drivers, generate QR codes, and export records. A UI is only as good as the people who can use it confidently.</div>
+            
           </div>
         </div>
-        <div class="tech-card reveal">
-          <div class="tech-icon">🐳</div>
-          <div class="tech-name">Docker</div>
-          <div class="tech-level">
-            <div class="tech-level-fill" style="width:65%"></div>
-          </div>
-        </div>
-        <div class="tech-card reveal">
-          <div class="tech-icon">📮</div>
-          <div class="tech-name">Postman / REST</div>
-          <div class="tech-level">
-            <div class="tech-level-fill" style="width:90%"></div>
-          </div>
-        </div>
+
+        
+
       </div>
     </section>
 
     <!-- ── CONTACT ── -->
     <section id="contact">
+      <div class="parallax-layer" data-depth="0.1" style="position:absolute;inset:0;pointer-events:none;z-index:0;">
+        <div class="circuit-bg" style="opacity:.04;"></div>
+      </div>
       <div class="section-tag">Open Channel</div>
       <h2 class="section-title">Contact</h2>
 
       <div class="contact-layout">
         <div>
           <p style="font-size:.82rem;color:var(--muted);line-height:1.8;margin-bottom:1.5rem;">
-            Open to new projects, collaborations, or just a good tech conversation. Drop a message — response time is
-            usually within 24 hours.
+            Open to new projects, collaborations, or just a good tech conversation. Drop a message — response time is usually within 24 hours.
           </p>
           <div class="contact-info-list reveal">
-            <a href="mailto:mark@example.com" class="contact-item">
+            <a href="mailto:mj.martinez00@yahoo.com" class="contact-item">
               <span class="contact-item-icon">📧</span>
               <div>
                 <div class="contact-item-label">Email</div>
-                <div class="contact-item-val">mj.martinez00@yahoo.com / markwafuu.ran@gmail.com</div>
+                <div class="contact-item-val">mj.martinez00@yahoo.com</div>
               </div>
             </a>
-
-    
-            
-           
-          
+            <a href="mailto:markwafuu.ran@gmail.com" class="contact-item">
+              <span class="contact-item-icon">📧</span>
+              <div>
+                <div class="contact-item-label">Email (Alt)</div>
+                <div class="contact-item-val">markwafuu.ran@gmail.com</div>
+              </div>
+            </a>
             <div class="contact-item">
               <span class="contact-item-icon">📍</span>
               <div>
@@ -570,20 +484,15 @@
                 <div class="contact-item-val">Valenzuela City, Philippines</div>
               </div>
             </div>
-
-              <div class="contact-item">
-              <span class="contact-item-icon">📞 </span>
+            <div class="contact-item">
+              <span class="contact-item-icon">📞</span>
               <div>
                 <div class="contact-item-label">Mobile</div>
                 <div class="contact-item-val">+639-489-733-145</div>
               </div>
             </div>
-
-
           </div>
         </div>
-
-    
       </div>
     </section>
 
@@ -596,11 +505,11 @@
     <div class="footer-links">
       <a href="#home">Top</a>
       <a href="#projects">Projects</a>
+      <a href="#blog">Blog</a>
       <a href="#contact">Contact</a>
     </div>
   </footer>
 
   <script src="assets/js/main.js"></script>
 </body>
-
 </html>
