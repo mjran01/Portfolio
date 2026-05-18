@@ -444,6 +444,7 @@ h2.section-title::after {
   font-size: clamp(1.8rem, 4vw, 3.2rem); font-weight: 900;
   color: #fff; letter-spacing: .08em; line-height: 1.05; margin-bottom: .55rem;
   text-shadow: 0 0 40px rgba(0,229,255,0.2);
+  overflow: hidden; /* contain glitch pseudo-elements within this element only */
 }
 .banner-role {
   font-family: 'Rajdhani', sans-serif; font-size: 1rem; font-weight: 600;
@@ -454,6 +455,7 @@ h2.section-title::after {
   font-size: .82rem; color: var(--cyan); min-height: 1.3em;
   text-shadow: 0 0 12px rgba(0,229,255,0.4);
   font-family: 'Share Tech Mono', monospace;
+  position: relative; z-index: 1; /* sit above any glitch pseudo-element bleed */
 }
 #typewriter::after { content: '▌'; animation: blink .65s step-end infinite; color: var(--green); }
 @keyframes blink { 50% { opacity: 0; } }
@@ -1031,6 +1033,7 @@ footer::before {
   .stack-tabs { gap: .35rem; }
   .stack-tab { font-size: .7rem; padding: .38rem .75rem; }
 }
+
 /* ── SUPPRESS BROWSER VIDEO CONTROLS ON ALIEN/ROCKET/UFO VIDEOS ── */
 .alien-video::-webkit-media-controls,
 .rocket-video::-webkit-media-controls,
