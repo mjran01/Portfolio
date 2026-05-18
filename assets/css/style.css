@@ -77,6 +77,64 @@ body::before {
   background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.5) 100%);
 }
 
+
+/* ─── ROCKET VIDEO ─── */
+.rocket-wrap {
+  position: fixed;
+  z-index: 498;
+  width: 160px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1s ease;
+  transform-origin: center center;
+}
+.rocket-wrap.visible {
+  opacity: 1;
+}
+.rocket-video {
+  width: 100%;
+  display: block;
+  mix-blend-mode: screen;
+}
+.rocket-exhaust {
+  position: absolute;
+  width: 60px;
+  height: 48px;
+  background: radial-gradient(ellipse at top, rgba(255,140,0,0.9), rgba(255,60,0,0.5), transparent);
+  border-radius: 0 0 50% 50%;
+  left: 50%;
+  transform-origin: top center;
+  animation: exhaust-flicker 0.12s steps(2) infinite;
+  pointer-events: none;
+}
+.rocket-glow {
+  position: absolute;
+  inset: -16px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,120,0,0.2) 0%, transparent 70%);
+  animation: rocket-glow-pulse 1.8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes exhaust-flicker {
+  0%   { opacity: 1;   transform: translateX(-50%) scaleX(1)   scaleY(1); }
+  50%  { opacity: 0.7; transform: translateX(-50%) scaleX(1.3) scaleY(0.85); }
+  100% { opacity: 0.9; transform: translateX(-50%) scaleX(0.8) scaleY(1.1); }
+}
+@keyframes rocket-glow-pulse {
+  0%,100% { opacity: 0.5; transform: scale(1); }
+  50%      { opacity: 1;   transform: scale(1.3); }
+}
+@keyframes rocket-float {
+  0%,100% { margin-top: 0px; }
+  50%      { margin-top: -10px; }
+}
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 900px) {
+  .rocket-wrap { width: 55px; }
+}
+
 /* ─── UFO VIDEO ─── */
 .ufo-wrap {
   position: fixed;
@@ -141,53 +199,106 @@ body::before {
 }
 
 /* ─── ALIEN VIDEO ─── */
-#alien-wrap {
+.alien-wrap {
   position: fixed;
-  bottom: 80px;
-  right: 20px;
   z-index: 500;
   width: 130px;
-  animation: alien-float 3.5s ease-in-out infinite, alien-drift 18s linear infinite;
-  filter: drop-shadow(0 0 12px rgba(0,255,65,0.6)) drop-shadow(0 0 30px rgba(0,255,65,0.2));
   cursor: pointer;
   transition: filter .3s;
+  animation:
+    alien-float 3.5s ease-in-out infinite,
+    alien-drift 18s linear infinite;
+
+  filter:
+    drop-shadow(0 0 12px rgba(0,255,65,0.6))
+    drop-shadow(0 0 30px rgba(0,255,65,0.2));
 }
-#alien-wrap:hover {
-  filter: drop-shadow(0 0 20px rgba(0,255,65,1)) drop-shadow(0 0 50px rgba(0,255,65,0.5));
-  animation: alien-float 1s ease-in-out infinite, alien-spin-hover .6s ease-in-out;
+
+/* RIGHT SIDE */
+.alien-wrap.right {
+  right: 20px;
 }
-#alien-video {
+
+/* LEFT SIDE */
+.alien-wrap.left {
+  left: 20px;
+}
+
+/* INDIVIDUAL POSITIONS */
+.r1 { bottom: 80px; }
+.r2 { bottom: 260px; }
+
+.l1 { bottom: 140px; }
+.l2 { bottom: 340px; }
+
+.alien-wrap:hover {
+  filter:
+    drop-shadow(0 0 20px rgba(0,255,65,1))
+    drop-shadow(0 0 50px rgba(0,255,65,0.5));
+
+  animation:
+    alien-float 1s ease-in-out infinite,
+    alien-spin-hover .6s ease-in-out;
+}
+
+.alien-video {
   width: 100%;
   display: block;
   border-radius: 4px;
-  mix-blend-mode: screen; /* removes background — pure floating alien */
+  mix-blend-mode: screen;
 }
-#alien-glow {
-  position: absolute; inset:-20px;
+
+.alien-glow {
+  position: absolute;
+  inset: -20px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(0,255,65,0.15) 0%, transparent 70%);
+  background:
+    radial-gradient(circle,
+    rgba(0,255,65,0.15) 0%,
+    transparent 70%);
+
   animation: alien-glow-pulse 2s ease-in-out infinite;
   pointer-events: none;
 }
+
 @keyframes alien-float {
-  0%,100% { transform: translateY(0px) rotate(-1deg); }
-  50%      { transform: translateY(-18px) rotate(1deg); }
+  0%,100% {
+    transform: translateY(0px) rotate(-1deg);
+  }
+  50% {
+    transform: translateY(-18px) rotate(1deg);
+  }
 }
+
 @keyframes alien-drift {
-  0%   { right: 20px; }
-  25%  { right: 40px; }
-  50%  { right: 20px; }
-  75%  { right: 5px; }
-  100% { right: 20px; }
+  0%   { transform: translateX(0px); }
+  25%  { transform: translateX(12px); }
+  50%  { transform: translateX(0px); }
+  75%  { transform: translateX(-12px); }
+  100% { transform: translateX(0px); }
 }
+
 @keyframes alien-spin-hover {
-  0%   { transform: rotate(0deg) scale(1); }
-  50%  { transform: rotate(15deg) scale(1.15); }
-  100% { transform: rotate(0deg) scale(1); }
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(15deg) scale(1.15);
+  }
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
 }
+
 @keyframes alien-glow-pulse {
-  0%,100% { opacity:.6; transform: scale(1); }
-  50%      { opacity:1;  transform: scale(1.2); }
+  0%,100% {
+    opacity: .6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
 }
 
 /* ─── HEADER ─── */

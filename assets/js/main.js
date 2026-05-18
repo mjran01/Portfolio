@@ -132,12 +132,11 @@ document.head.appendChild(styleSheet);
 
 /* ─── TYPEWRITER ─── */
 const phrases = [
-  'Building civic tech for Valenzuela City...',
   'Full-Stack Developer | Go · SvelteKit · React',
   'Engineering systems that serve real people.',
   'Writing clean code. Shipping real products.',
-  '// Wake up, Neo...',
-  'Access granted. Welcome, Mark.',
+  '// Wake up, Mark...',
+  'Access granted. Welcome, Mark Martinez.',
   'System online. All units operational.',
 ];
 let pi=0, ci=0, deleting=false;
@@ -278,46 +277,111 @@ document.querySelectorAll('.btn').forEach(btn => {
 });
 
 /* ─── ALIEN VIDEO INTERACTIONS ─── */
-const alienWrap = document.getElementById('alien-wrap');
-const alienVideo = document.getElementById('alien-video');
-let alienClicks = 0;
-alienWrap.addEventListener('click', () => {
-  alienClicks++;
-  // cycle through fun animations
-  const anims = [
-    'alien-spin', 'alien-shake', 'alien-bounce', 'alien-zoom'
-  ];
-  // inject one-shot keyframes if not already injected
-  if (!document.getElementById('alien-oneshot')) {
-    const s = document.createElement('style');
-    s.id = 'alien-oneshot';
-    s.textContent = `
-      @keyframes alien-spin   { 0%{transform:rotate(0)} 100%{transform:rotate(360deg) scale(1.2)} }
-      @keyframes alien-shake  { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-12px) rotate(-5deg)} 40%,80%{transform:translateX(12px) rotate(5deg)} }
-      @keyframes alien-bounce { 0%,100%{transform:translateY(0) scale(1)} 40%{transform:translateY(-40px) scale(1.2)} 70%{transform:translateY(-20px) scale(1.1)} }
-      @keyframes alien-zoom   { 0%,100%{transform:scale(1)} 50%{transform:scale(1.8)} }
-    `;
-    document.head.appendChild(s);
-  }
-  const anim = anims[alienClicks % anims.length];
-  alienWrap.style.animation = `${anim} 0.7s ease`;
-  setTimeout(() => {
-    alienWrap.style.animation = 'alien-float 3.5s ease-in-out infinite, alien-drift 18s linear infinite';
-  }, 700);
-  // flash the glow green briefly
-  alienWrap.style.filter = 'drop-shadow(0 0 30px rgba(0,255,65,1)) drop-shadow(0 0 60px rgba(0,255,65,0.6))';
-  setTimeout(() => { alienWrap.style.filter = ''; }, 500);
+const alienWraps = document.querySelectorAll('.alien-wrap');
+
+alienWraps.forEach((alienWrap, index) => {
+
+  let alienClicks = 0;
+
+  alienWrap.addEventListener('click', () => {
+
+    alienClicks++;
+
+    const anims = [
+      'alien-spin',
+      'alien-shake',
+      'alien-bounce',
+      'alien-zoom'
+    ];
+
+    // inject animations once
+    if (!document.getElementById('alien-oneshot')) {
+
+      const s = document.createElement('style');
+
+      s.id = 'alien-oneshot';
+
+      s.textContent = `
+        @keyframes alien-spin {
+          0% { transform: rotate(0) }
+          100% { transform: rotate(360deg) scale(1.2) }
+        }
+
+        @keyframes alien-shake {
+          0%,100% { transform: translateX(0) }
+          20%,60% { transform: translateX(-12px) rotate(-5deg) }
+          40%,80% { transform: translateX(12px) rotate(5deg) }
+        }
+
+        @keyframes alien-bounce {
+          0%,100% {
+            transform: translateY(0) scale(1)
+          }
+
+          40% {
+            transform: translateY(-40px) scale(1.2)
+          }
+
+          70% {
+            transform: translateY(-20px) scale(1.1)
+          }
+        }
+
+        @keyframes alien-zoom {
+          0%,100% { transform: scale(1) }
+          50% { transform: scale(1.8) }
+        }
+      `;
+
+      document.head.appendChild(s);
+    }
+
+    const anim = anims[alienClicks % anims.length];
+
+    alienWrap.style.animation = `${anim} 0.7s ease`;
+
+    setTimeout(() => {
+
+      alienWrap.style.animation =
+        'alien-float 3.5s ease-in-out infinite, alien-drift 18s linear infinite';
+
+    }, 700);
+
+    alienWrap.style.filter =
+      'drop-shadow(0 0 30px rgba(0,255,65,1)) drop-shadow(0 0 60px rgba(0,255,65,0.6))';
+
+    setTimeout(() => {
+      alienWrap.style.filter = '';
+    }, 500);
+  });
+
 });
 
-// alien reacts to scroll speed
+
+/* SCROLL REACTION */
+
 let lastScrollY = 0;
+
 window.addEventListener('scroll', () => {
+
   const speed = Math.abs(window.scrollY - lastScrollY);
+
   lastScrollY = window.scrollY;
-  if (speed > 30) {
-    alienWrap.style.filter = `drop-shadow(0 0 ${8 + speed}px rgba(0,255,65,0.8))`;
-    setTimeout(() => { alienWrap.style.filter = ''; }, 300);
-  }
+
+  alienWraps.forEach(alienWrap => {
+
+    if (speed > 30) {
+
+      alienWrap.style.filter =
+        `drop-shadow(0 0 ${8 + speed}px rgba(0,255,65,0.8))`;
+
+      setTimeout(() => {
+        alienWrap.style.filter = '';
+      }, 300);
+    }
+
+  });
+
 }, { passive: true });
 
 /* ─── SIDEBAR ACTIVE LINK ─── */
@@ -506,7 +570,7 @@ document.querySelectorAll('h2.section-title').forEach(h => titleObs.observe(h));
 /* ─── RANDOM UFO SPAWNER ─── */
 (function () {
   const UFO_COUNT   = 3;      /* max UFOs alive at once          */
-  const MIN_DELAY   = 8000;   /* ms before next UFO spawns       */
+  const MIN_DELAY   = 6000;   /* ms before next UFO spawns       */
   const MAX_DELAY   = 22000;
   const MIN_STAY    = 6000;   /* how long a UFO lingers          */
   const MAX_STAY    = 14000;
@@ -580,5 +644,135 @@ document.querySelectorAll('h2.section-title').forEach(h => titleObs.observe(h));
 
   /* First UFO appears quickly so the effect is noticed */
   setTimeout(spawnUFO, 2500);
+  scheduleNext();
+})();
+
+
+/* ─── RANDOM ROCKET SPAWNER ─── */
+(function () {
+  const ROCKET_COUNT = 3;
+  const MIN_DELAY    = 8000;
+  const MAX_DELAY    = 12000;
+  const MIN_STAY     = 7000;
+  const MAX_STAY     = 18000;
+
+  /* All 8 compass directions the rocket can travel + its visual rotation */
+  const DIRECTIONS = [
+    { label: 'up',         angle: 0,    vx:  0,    vy: -1   },
+    { label: 'up-right',   angle: 45,   vx:  0.7,  vy: -0.7 },
+    { label: 'right',      angle: 90,   vx:  1,    vy:  0   },
+    { label: 'down-right', angle: 135,  vx:  0.7,  vy:  0.7 },
+    { label: 'down',       angle: 180,  vx:  0,    vy:  1   },
+    { label: 'down-left',  angle: 225,  vx: -0.7,  vy:  0.7 },
+    { label: 'left',       angle: 270,  vx: -1,    vy:  0   },
+    { label: 'up-left',    angle: 315,  vx: -0.7,  vy: -0.7 },
+  ];
+
+  function rand(min, max) { return Math.random() * (max - min) + min; }
+  function randInt(min, max) { return Math.floor(rand(min, max)); }
+
+  function positionExhaust(wrap, angle) {
+    const exhaust = wrap.querySelector('.rocket-exhaust');
+    if (!exhaust) return;
+    const rad = (angle * Math.PI) / 180;
+    const dist = 38;
+    /* exhaust sits opposite to the nose direction */
+    const ex = 50 + Math.sin(rad + Math.PI) * 60;
+    const ey = 50 + (-Math.cos(rad + Math.PI)) * 60;
+    exhaust.style.left = ex + '%';
+    exhaust.style.top  = ey + '%';
+    /* rotate exhaust to point away from nose */
+    exhaust.style.transform = `translateX(-50%) rotate(${angle}deg)`;
+  }
+
+  function spawnRocket() {
+    if (document.querySelectorAll('.rocket-wrap').length >= ROCKET_COUNT) return;
+
+    const dir  = DIRECTIONS[randInt(0, DIRECTIONS.length)];
+    const wrap = document.createElement('div');
+    wrap.className = 'rocket-wrap';
+
+    const vw   = window.innerWidth;
+    const vh   = window.innerHeight;
+    const size = 150;
+
+    /* Spawn near the edge opposite to travel direction so it flies across */
+    let startX, startY;
+    if (dir.vx > 0)       startX = -size;
+    else if (dir.vx < 0)  startX = vw + size;
+    else                   startX = rand(size, vw - size);
+
+    if (dir.vy > 0)       startY = -size;
+    else if (dir.vy < 0)  startY = vh + size;
+    else                   startY = rand(size, vh - size);
+
+    wrap.style.left = startX + 'px';
+    wrap.style.top  = startY + 'px';
+
+    /* Rotate the wrap to face travel direction;
+       video is "nose-up" so angle 0 = up, 90 = right, etc. */
+    wrap.style.transform = `rotate(${dir.angle}deg)`;
+
+    const stayTime = rand(MIN_STAY, MAX_STAY);
+    const speed    = rand(0.35, 0.9);   /* px per ms */
+
+    wrap.innerHTML = `
+      <video class="rocket-video" src="assets/video/rocket.webm"
+             autoplay loop muted playsinline></video>
+      <div class="rocket-glow"></div>
+      <div class="rocket-exhaust"></div>
+    `;
+
+    document.body.appendChild(wrap);
+    positionExhaust(wrap, dir.angle);
+
+    /* Fade in */
+    requestAnimationFrame(() => requestAnimationFrame(() => wrap.classList.add('visible')));
+
+    /* Continuous smooth flight across screen */
+    let lastTime = null;
+    let curX = startX;
+    let curY = startY;
+    let alive = true;
+
+    function fly(ts) {
+      if (!alive) return;
+      if (!lastTime) lastTime = ts;
+      const dt = ts - lastTime;
+      lastTime = ts;
+
+      curX += dir.vx * speed * dt;
+      curY += dir.vy * speed * dt;
+      wrap.style.left = curX + 'px';
+      wrap.style.top  = curY + 'px';
+
+      /* gentle wobble on the perpendicular axis */
+      const wobble = Math.sin(ts / 400) * 2.5;
+      const perpX  = -dir.vy * wobble;
+      const perpY  =  dir.vx * wobble;
+      wrap.style.left = (curX + perpX) + 'px';
+      wrap.style.top  = (curY + perpY) + 'px';
+
+      requestAnimationFrame(fly);
+    }
+    requestAnimationFrame(fly);
+
+    /* Fade out and remove */
+    setTimeout(() => {
+      alive = false;
+      wrap.classList.remove('visible');
+      wrap.addEventListener('transitionend', () => wrap.remove(), { once: true });
+    }, stayTime);
+  }
+
+  function scheduleNext() {
+    setTimeout(() => {
+      spawnRocket();
+      scheduleNext();
+    }, rand(MIN_DELAY, MAX_DELAY));
+  }
+
+  /* First rocket fires early */
+  setTimeout(spawnRocket, 5000);
   scheduleNext();
 })();
