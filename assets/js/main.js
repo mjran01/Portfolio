@@ -502,3 +502,83 @@ glitchEnterStyle.textContent = `
 `;
 document.head.appendChild(glitchEnterStyle);
 document.querySelectorAll('h2.section-title').forEach(h => titleObs.observe(h));
+
+/* ─── RANDOM UFO SPAWNER ─── */
+(function () {
+  const UFO_COUNT   = 3;      /* max UFOs alive at once          */
+  const MIN_DELAY   = 8000;   /* ms before next UFO spawns       */
+  const MAX_DELAY   = 22000;
+  const MIN_STAY    = 6000;   /* how long a UFO lingers          */
+  const MAX_STAY    = 14000;
+
+  function rand(min, max) { return Math.random() * (max - min) + min; }
+
+  function spawnUFO() {
+    /* Don't exceed cap */
+    if (document.querySelectorAll('.ufo-wrap').length >= UFO_COUNT) return;
+
+    const wrap = document.createElement('div');
+    wrap.className = 'ufo-wrap';
+
+    /* Random position anywhere in the viewport */
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const size = wrap.style.width ? parseInt(wrap.style.width) : 110;
+
+    wrap.style.left = rand(10, vw - size - 20) + 'px';
+    wrap.style.top  = rand(10, vh - size - 60) + 'px';
+
+    /* Randomise float duration so multiple UFOs feel independent */
+    wrap.style.animationDuration = rand(3.2, 5.5).toFixed(2) + 's';
+
+    wrap.innerHTML = `
+      <video class="ufo-video" src="assets/video/ufo.webm" autoplay loop muted playsinline></video>
+      <div class="ufo-glow"></div>
+      <div class="ufo-beam"></div>
+    `;
+
+    document.body.appendChild(wrap);
+
+    /* Fade in */
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => wrap.classList.add('visible'));
+    });
+
+    /* Drift slowly while alive */
+    let driftX = rand(-60, 60);
+    let driftY = rand(-40, 40);
+    let elapsed = 0;
+    const stayTime = rand(MIN_STAY, MAX_STAY);
+    const DRIFT_INTERVAL = 3000;
+
+    const driftTimer = setInterval(() => {
+      elapsed += DRIFT_INTERVAL;
+      if (elapsed >= stayTime) { clearInterval(driftTimer); return; }
+
+      const newLeft = Math.min(Math.max(10, parseFloat(wrap.style.left) + rand(-50, 50)), vw - size - 20);
+      const newTop  = Math.min(Math.max(10, parseFloat(wrap.style.top)  + rand(-35, 35)), vh - size - 60);
+      wrap.style.transition = 'left 2.8s ease-in-out, top 2.8s ease-in-out, opacity 1.2s ease';
+      wrap.style.left = newLeft + 'px';
+      wrap.style.top  = newTop  + 'px';
+    }, DRIFT_INTERVAL);
+
+    /* Fade out, then remove */
+    setTimeout(() => {
+      clearInterval(driftTimer);
+      wrap.classList.remove('visible');
+      wrap.addEventListener('transitionend', () => wrap.remove(), { once: true });
+    }, stayTime);
+  }
+
+  /* Keep scheduling new UFOs forever */
+  function scheduleNext() {
+    setTimeout(() => {
+      spawnUFO();
+      scheduleNext();
+    }, rand(MIN_DELAY, MAX_DELAY));
+  }
+
+  /* First UFO appears quickly so the effect is noticed */
+  setTimeout(spawnUFO, 2500);
+  scheduleNext();
+})();

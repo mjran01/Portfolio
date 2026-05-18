@@ -77,6 +77,69 @@ body::before {
   background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.5) 100%);
 }
 
+/* ─── UFO VIDEO ─── */
+.ufo-wrap {
+  position: fixed;
+  z-index: 499;
+  width: 110px;
+  pointer-events: none;
+  filter: drop-shadow(0 0 10px rgba(120,200,255,0.7)) drop-shadow(0 0 28px rgba(120,200,255,0.25));
+  animation: ufo-float 4s ease-in-out infinite;
+  transition: opacity 1.2s ease;
+  opacity: 0;
+}
+.ufo-wrap.visible {
+  opacity: 1;
+}
+.ufo-video {
+  width: 100%;
+  display: block;
+  border-radius: 4px;
+  mix-blend-mode: screen;
+}
+.ufo-beam {
+  position: absolute;
+  bottom: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 40px;
+  background: linear-gradient(to bottom, rgba(120,200,255,0.35), transparent);
+  clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);
+  animation: ufo-beam-pulse 2.5s ease-in-out infinite;
+  pointer-events: none;
+}
+.ufo-glow {
+  position: absolute;
+  inset: -18px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(120,200,255,0.18) 0%, transparent 70%);
+  animation: ufo-glow-pulse 2.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes ufo-float {
+  0%,100% { transform: translateY(0px) rotate(-1.5deg); }
+  50%      { transform: translateY(-20px) rotate(1.5deg); }
+}
+@keyframes ufo-glow-pulse {
+  0%,100% { opacity: .5; transform: scale(1); }
+  50%      { opacity: 1;  transform: scale(1.25); }
+}
+@keyframes ufo-beam-pulse {
+  0%,100% { opacity: .4; }
+  50%      { opacity: 1; }
+}
+@keyframes ufo-enter {
+  from { transform: translateY(-60px) scale(0.7); opacity: 0; }
+  to   { transform: translateY(0) scale(1);   opacity: 1; }
+}
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 900px) {
+  .ufo-wrap { width: 75px; }
+}
+
 /* ─── ALIEN VIDEO ─── */
 #alien-wrap {
   position: fixed;
