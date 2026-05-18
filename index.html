@@ -4,43 +4,194 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mark // Full-Stack Developer</title>
-  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&family=Exo+2:ital,wght@0,100;0,400;0,700;1,400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/css/style.css" />
+
+  <style>
+    /* ── INLINE CRITICAL ADDITIONS ────────────────────────────── */
+
+    /* Quantum energy bars on section tops */
+    section::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent 0%, rgba(0,229,255,0.4) 30%, rgba(0,255,65,0.4) 60%, transparent 100%);
+      z-index: 2; pointer-events: none;
+      opacity: 0;
+      animation: section-top-line 6s ease-in-out infinite;
+      animation-delay: calc(var(--sec-delay, 0) * 1s);
+    }
+    @keyframes section-top-line {
+      0%,100% { opacity: 0; }
+      50%      { opacity: 1; }
+    }
+
+    /* Floating coordinate display */
+    #hud-coords {
+      position: fixed; bottom: 1.2rem; right: 1.2rem; z-index: 95;
+      font-family: 'Share Tech Mono', monospace; font-size: .6rem;
+      color: rgba(0,229,255,0.4); letter-spacing: .1em;
+      pointer-events: none; text-align: right; line-height: 1.8;
+    }
+    #hud-coords span { display: block; }
+
+    /* System time HUD */
+    #hud-time {
+      position: fixed; bottom: 1.2rem; left: calc(var(--sidebar-w) + 1.2rem); z-index: 95;
+      font-family: 'Share Tech Mono', monospace; font-size: .6rem;
+      color: rgba(0,255,65,0.35); letter-spacing: .1em;
+      pointer-events: none; line-height: 1.8;
+    }
+
+    /* Data stream binary overlay */
+    #data-streams { opacity: 0.55; }
+
+    /* Corner bracket frames on every section */
+    section > .sec-corner { position: absolute; width: 16px; height: 16px; border-color: rgba(0,229,255,0.25); border-style: solid; pointer-events: none; z-index: 3; }
+    .sec-corner.tl { top: 12px; left: 12px; border-width: 1px 0 0 1px; }
+    .sec-corner.tr { top: 12px; right: 12px; border-width: 1px 1px 0 0; }
+    .sec-corner.bl { bottom: 12px; left: 12px; border-width: 0 0 1px 1px; }
+    .sec-corner.br { bottom: 12px; right: 12px; border-width: 0 1px 1px 0; }
+
+    /* Plasma energy meter on About stats */
+    .stat-box::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, var(--plasma), var(--cyan), var(--green));
+      transform: scaleX(0); transform-origin: left;
+      transition: transform .5s cubic-bezier(.4,0,.2,1);
+    }
+    .stat-box:hover::before { transform: scaleX(1); }
+
+    /* HEX ID labels on project cards */
+    .project-card::after {
+      content: attr(data-hex);
+      position: absolute; top: .5rem; right: .7rem;
+      font-family: 'Share Tech Mono', monospace; font-size: .52rem;
+      color: rgba(0,229,255,0.3); letter-spacing: .08em;
+      z-index: 3; pointer-events: none;
+      transition: color .3s;
+    }
+    .project-card:hover::after { color: rgba(0,229,255,0.7); }
+
+    /* Sidebar active link pulse ring */
+    .sidebar-link.active .icon {
+      position: relative;
+    }
+    .sidebar-link.active .icon::before {
+      content: '';
+      position: absolute; inset: -4px; border-radius: 50%;
+      border: 1px solid var(--cyan);
+      animation: icon-ring .6s ease-out;
+    }
+    @keyframes icon-ring {
+      0%   { opacity: 1; transform: scale(0.5); }
+      100% { opacity: 0; transform: scale(2); }
+    }
+
+    /* Quantum loader bar at very top of page */
+    #quantum-loader {
+      position: fixed; top: 0; left: 0; right: 0; height: 2px; z-index: 9999;
+      background: linear-gradient(90deg, var(--green), var(--cyan), var(--plasma), var(--accent), var(--green));
+      background-size: 300%;
+      animation: quantum-load 2s linear forwards, quantum-shift 1s linear infinite;
+      transform-origin: left;
+    }
+    @keyframes quantum-load { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+    @keyframes quantum-shift { 0% { background-position: 0%; } 100% { background-position: 300%; } }
+
+    /* Cyber noise texture overlay */
+    #noise-overlay {
+      position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: .025;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      background-size: 256px 256px;
+      mix-blend-mode: overlay;
+    }
+
+    /* "See more" btn */
+    .btn-ghost {
+      font-family: 'Rajdhani', sans-serif; font-weight: 700;
+      letter-spacing: .15em; text-transform: uppercase; font-size: .75rem;
+      padding: .5rem 1.4rem; border-radius: 3px; cursor: pointer;
+      background: transparent; border: 1px solid rgba(0,229,255,0.3);
+      color: rgba(0,229,255,0.7); transition: all .22s;
+    }
+    .btn-ghost:hover {
+      border-color: var(--cyan); color: var(--cyan);
+      box-shadow: 0 0 20px rgba(0,229,255,0.25);
+    }
+
+    /* Tech card: holographic overlay shimmer */
+    .tech-card::before {
+      content: '';
+      position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0,229,255,0.05), transparent);
+      transition: left .5s;
+      pointer-events: none;
+    }
+    .tech-card:hover::before { left: 140%; }
+
+    /* Animated gradient border on .banner */
+    .banner-grad-border {
+      position: absolute; inset: 0; border-radius: 6px; pointer-events: none; z-index: 0;
+      background: linear-gradient(var(--bg), var(--bg)) padding-box,
+                  linear-gradient(90deg, rgba(0,229,255,0.3), rgba(0,255,65,0.3), rgba(123,47,255,0.2), rgba(0,229,255,0.3)) border-box;
+      border: 1px solid transparent;
+      animation: border-rotate 5s linear infinite;
+    }
+    @keyframes border-rotate {
+      0%   { background: linear-gradient(var(--bg),var(--bg)) padding-box, linear-gradient(0deg,  rgba(0,229,255,0.3), rgba(0,255,65,0.3))   border-box; }
+      50%  { background: linear-gradient(var(--bg),var(--bg)) padding-box, linear-gradient(180deg,rgba(0,229,255,0.3), rgba(123,47,255,0.25)) border-box; }
+      100% { background: linear-gradient(var(--bg),var(--bg)) padding-box, linear-gradient(360deg,rgba(0,229,255,0.3), rgba(0,255,65,0.3))   border-box; }
+    }
+  </style>
 </head>
 <body>
+
+  <!-- QUANTUM LOADER -->
+  <div id="quantum-loader"></div>
+
+  <!-- NOISE OVERLAY -->
+  <div id="noise-overlay"></div>
 
   <!-- CURSOR -->
   <div id="cursor"></div>
   <div id="cursor-dot"></div>
   <div id="cursor-trail-container"></div>
 
+  <!-- HUD ELEMENTS -->
+  <div id="hud-coords">
+    <span id="hud-x">X: 0000</span>
+    <span id="hud-y">Y: 0000</span>
+    <span id="hud-section">SEC: HOME</span>
+  </div>
+  <div id="hud-time">
+    <span id="hud-clock">00:00:00</span>
+    <span>SYS:ONLINE</span>
+    <span style="color:rgba(0,255,65,0.3)">PHL_TIMEZONE</span>
+  </div>
+
   <!-- MATRIX RAIN -->
   <canvas id="matrix-canvas"></canvas>
 
-  <!-- FLOATING ALIEN VIDEO — fixed, always dancing -->
-  <!-- RIGHT SIDE -->
+  <!-- ALIEN WRAPS — RIGHT -->
   <div class="alien-wrap right r1">
-    <video class="alien-video" src="assets/video/alien.webm" autoplay loop muted playsinline></video>
+    <video class="alien-video" src="assets/video/alien.webm" autoplay loop muted playsinline disablepictureinpicture controlslist="nodownload nofullscreen noremoteplayback"></video>
     <div class="alien-glow"></div>
   </div>
-
   <div class="alien-wrap right r2">
-    <video class="alien-video" src="assets/video/alien.webm" autoplay loop muted playsinline></video>
+    <video class="alien-video" src="assets/video/alien.webm" autoplay loop muted playsinline disablepictureinpicture controlslist="nodownload nofullscreen noremoteplayback"></video>
     <div class="alien-glow"></div>
   </div>
 
-  <!-- LEFT SIDE -->
+  <!-- ALIEN WRAPS — LEFT -->
   <div class="alien-wrap left l1">
-    <video class="alien-video" src="assets/video/alien.webm" autoplay loop muted playsinline></video>
+    <video class="alien-video" src="assets/video/alien.webm" autoplay loop muted playsinline disablepictureinpicture controlslist="nodownload nofullscreen noremoteplayback"></video>
     <div class="alien-glow"></div>
   </div>
-
   <div class="alien-wrap left l2">
-    <video class="alien-video" src="assets/video/alien.webm" autoplay loop muted playsinline></video>
+    <video class="alien-video" src="assets/video/alien.webm" autoplay loop muted playsinline disablepictureinpicture controlslist="nodownload nofullscreen noremoteplayback"></video>
     <div class="alien-glow"></div>
   </div>
-
-
 
   <!-- HEADER -->
   <header id="site-header">
@@ -60,7 +211,7 @@
   </header>
 
   <!-- SIDEBAR TOGGLE -->
-  <button id="sidebar-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+  <button id="sidebar-toggle">☰</button>
 
   <!-- SIDEBAR -->
   <nav id="sidebar">
@@ -76,28 +227,36 @@
       <span class="icon">▶</span> Resume.pdf
     </a>
     <div class="sidebar-footer">
-      <div>Mark Jezreel Martinez</div>
-      <div style="color:var(--green);margin-top:.3rem;">Fullstack Developer</div>
-      <div style="margin-top:.5rem;">Valenzuela City, PH 🇵🇭</div>
+      <div style="color:var(--cyan);font-family:'Orbitron',monospace;font-size:.65rem;letter-spacing:.1em;">Mark Jezreel Martinez</div>
+      <div style="color:var(--green);margin-top:.3rem;font-size:.6rem;">Fullstack Developer</div>
+      <div style="margin-top:.4rem;font-size:.6rem;">Valenzuela City, PH 🇵🇭</div>
+      <div style="margin-top:.6rem;font-size:.55rem;color:rgba(0,229,255,0.3);letter-spacing:.12em;">BUILD_2090.STABLE</div>
     </div>
   </nav>
 
   <!-- MAIN -->
   <main id="main">
 
-    <!-- ── HERO ── -->
-    <section id="home">
+    <!-- ══════════════════════════════════════
+         HERO
+    ═══════════════════════════════════════ -->
+    <section id="home" style="--sec-delay:0">
+      <div class="sec-corner tl"></div>
+      <div class="sec-corner tr"></div>
+      <div class="sec-corner bl"></div>
+      <div class="sec-corner br"></div>
+
       <canvas id="particle-canvas"></canvas>
 
-      <!-- parallax depth layers -->
       <div class="parallax-layer" data-depth="0.1" style="position:absolute;inset:0;pointer-events:none;z-index:0;">
-        <div class="hex-bg" style="opacity:.06;"></div>
+        <div class="hex-bg"></div>
       </div>
       <div class="parallax-layer" data-depth="0.25" style="position:absolute;inset:0;pointer-events:none;z-index:0;">
         <div class="stars-field" id="stars1"></div>
       </div>
 
       <div class="banner reveal" data-parallax-card>
+        <div class="banner-grad-border"></div>
         <div class="banner-corner tl"></div>
         <div class="banner-corner tr"></div>
         <div class="banner-corner bl"></div>
@@ -119,52 +278,57 @@
       </div>
 
       <!-- OBJECTIVES -->
-        <div>
-          <div class="section-tag">Core Objectives</div>
-          <h2 class="section-title">Objectives</h2>
+      <div>
+        <div class="section-tag">Core Objectives</div>
+        <h2 class="section-title">Objectives</h2>
 
-          <div class="objectives-grid">
+        <div class="objectives-grid">
 
-            <div class="obj-card reveal" style="animation-delay:.1s">
-              <div class="obj-icon">⚙️</div>
-              <div class="obj-title">Build Enterprise-Ready Systems</div>
-              <div class="obj-desc">
-                Develop scalable, high-performance platforms designed to support growing businesses, complex operations, and real-world demands across multiple industries.
-              </div>
+          <div class="obj-card reveal" style="animation-delay:.1s">
+            <div class="obj-icon">⚙️</div>
+            <div class="obj-title">Build Enterprise-Ready Systems</div>
+            <div class="obj-desc">
+              Develop scalable, high-performance platforms designed to support growing businesses, complex operations, and real-world demands across multiple industries.
             </div>
-
-            <div class="obj-card reveal" style="animation-delay:.2s">
-              <div class="obj-icon">🖥️</div>
-              <div class="obj-title">Create Exceptional User Experiences</div>
-              <div class="obj-desc">
-                Design modern, intuitive, and responsive interfaces that improve usability, strengthen engagement, and deliver seamless digital experiences.
-              </div>
-            </div>
-
-            <div class="obj-card reveal" style="animation-delay:.3s">
-              <div class="obj-icon">🔒</div>
-              <div class="obj-title">Deliver Secure & Reliable Solutions</div>
-              <div class="obj-desc">
-                Build software with security, maintainability, and long-term stability at its core — ensuring dependable systems for organizations and users alike.
-              </div>
-            </div>
-
-            <div class="obj-card reveal" style="animation-delay:.4s">
-              <div class="obj-icon">🚀</div>
-              <div class="obj-title">Drive Digital Innovation</div>
-              <div class="obj-desc">
-                Transform ideas into impactful digital products that help businesses, institutions, and public organizations stay competitive in a rapidly evolving world.
-              </div>
-            </div>
-
           </div>
-        </div>
 
+          <div class="obj-card reveal" style="animation-delay:.2s">
+            <div class="obj-icon">🖥️</div>
+            <div class="obj-title">Create Exceptional User Experiences</div>
+            <div class="obj-desc">
+              Design modern, intuitive, and responsive interfaces that improve usability, strengthen engagement, and deliver seamless digital experiences.
+            </div>
+          </div>
+
+          <div class="obj-card reveal" style="animation-delay:.3s">
+            <div class="obj-icon">🔒</div>
+            <div class="obj-title">Deliver Secure & Reliable Solutions</div>
+            <div class="obj-desc">
+              Build software with security, maintainability, and long-term stability at its core — ensuring dependable systems for organizations and users alike.
+            </div>
+          </div>
+
+          <div class="obj-card reveal" style="animation-delay:.4s">
+            <div class="obj-icon">🚀</div>
+            <div class="obj-title">Drive Digital Innovation</div>
+            <div class="obj-desc">
+              Transform ideas into impactful digital products that help businesses, institutions, and public organizations stay competitive in a rapidly evolving world.
+            </div>
+          </div>
+
+        </div>
+      </div>
     </section>
 
-    <!-- ── ABOUT ── -->
-    <section id="about">
-      <!-- parallax bg layer -->
+    <!-- ══════════════════════════════════════
+         ABOUT
+    ═══════════════════════════════════════ -->
+    <section id="about" style="--sec-delay:1">
+      <div class="sec-corner tl"></div>
+      <div class="sec-corner tr"></div>
+      <div class="sec-corner bl"></div>
+      <div class="sec-corner br"></div>
+
       <div class="parallax-layer" data-depth="0.15" style="position:absolute;inset:0;pointer-events:none;z-index:0;">
         <div class="circuit-bg"></div>
       </div>
@@ -221,8 +385,13 @@
       </div>
     </section>
 
-    <!-- ── PROJECTS ── -->
-    <section id="projects">
+    <!-- ══════════════════════════════════════
+         PROJECTS
+    ═══════════════════════════════════════ -->
+    <section id="projects" style="--sec-delay:2;min-height:auto;padding-bottom:5rem;">
+      <div class="sec-corner tl"></div>
+      <div class="sec-corner tr"></div>
+
       <div class="parallax-layer" data-depth="0.08" style="position:absolute;inset:0;pointer-events:none;z-index:0;">
         <div class="grid-bg"></div>
       </div>
@@ -239,14 +408,14 @@
       <div class="carousel-wrap">
         <div class="carousel-track" id="carousel-track">
 
-          <div class="project-card">
+          <div class="project-card" data-hex="#A3F2">
             <a href="https://shangpropertiesleasing.com" target="_blank">
               <img src="assets/images/101.png" alt="Shang Properties Leasing" class="project-thumb" />
             </a>
             <div class="project-body">
               <span class="project-tag">Real Estate · Leasing</span>
               <div class="project-title">Shang Properties Leasing</div>
-              <div class="project-desc">A modern informational website for Shang Properties Leasing, showcasing premium leasing spaces, property information, and a professional online presence for potential clients and tenants.</div>
+              <div class="project-desc">A modern informational website for Shang Properties Leasing, showcasing premium leasing spaces and property information for potential clients.</div>
               <div class="project-stack">
                 <span class="stack-pill">HTML</span><span class="stack-pill">CSS</span>
                 <span class="stack-pill">JavaScript</span><span class="stack-pill">Custom WordPress</span>
@@ -254,7 +423,7 @@
             </div>
           </div>
 
-          <div class="project-card">
+          <div class="project-card" data-hex="#7D1E">
             <a href="https://tmo.valenzuela.gov.ph" target="_blank">
               <img src="assets/images/103.png" alt="PTDID Portal" class="project-thumb" />
             </a>
@@ -269,14 +438,14 @@
             </div>
           </div>
 
-          <div class="project-card">
+          <div class="project-card" data-hex="#C9B3">
             <a href="https://vibetribenotions.com" target="_blank">
               <img src="assets/images/104.png" alt="Vibe Tribe Notions" class="project-thumb" />
             </a>
             <div class="project-body">
               <span class="project-tag">Freelance · Wellness</span>
               <div class="project-title">Vibe Tribe Notions</div>
-              <div class="project-desc">Full custom WordPress site for a spiritual wellness practitioner. Custom booking system, dynamic product shop with cart, email checkout, and AJAX-powered admin panel.</div>
+              <div class="project-desc">Full custom WordPress site for a spiritual wellness practitioner. Custom booking system, dynamic product shop with cart, email checkout, and AJAX admin.</div>
               <div class="project-stack">
                 <span class="stack-pill">Custom WordPress</span><span class="stack-pill">PHP</span>
                 <span class="stack-pill">AJAX</span><span class="stack-pill">MySQL</span>
@@ -284,14 +453,14 @@
             </div>
           </div>
 
-          <div class="project-card">
+          <div class="project-card" data-hex="#F2A1">
             <a href="https://www.philbritish.com/" target="_blank">
               <img src="assets/images/102.png" alt="PhilBritish Insurance" class="project-thumb" />
             </a>
             <div class="project-body">
               <span class="project-tag">Insurance · Corporate</span>
               <div class="project-title">PhilBritish Insurance</div>
-              <div class="project-desc">A professional corporate website for PhilBritish Insurance, showcasing non-life insurance services, claims information, and responsive business-focused design.</div>
+              <div class="project-desc">Professional corporate website for PhilBritish Insurance, showcasing non-life insurance services, claims information, and business-focused design.</div>
               <div class="project-stack">
                 <span class="stack-pill">WordPress</span><span class="stack-pill">PHP</span>
                 <span class="stack-pill">Responsive Design</span><span class="stack-pill">UI/UX</span>
@@ -299,14 +468,14 @@
             </div>
           </div>
 
-          <div class="project-card">
+          <div class="project-card" data-hex="#E3D5">
             <a href="https://jinxi.blitzworx2.com/" target="_blank">
               <img src="assets/images/105.png" alt="JPDC Beta Version" class="project-thumb" />
             </a>
             <div class="project-body">
               <span class="project-tag">Corporate · Brand Website</span>
               <div class="project-title">JPDC (Beta Version)</div>
-              <div class="project-desc">A modern WordPress website for JPDC featuring clean layouts, responsive design, brand-focused presentation, and a professional digital presence.</div>
+              <div class="project-desc">A modern WordPress website for JPDC featuring clean layouts, responsive design, brand-focused presentation, and professional digital presence.</div>
               <div class="project-stack">
                 <span class="stack-pill">WordPress</span><span class="stack-pill">PHP</span>
                 <span class="stack-pill">Responsive Design</span><span class="stack-pill">UI/UX</span>
@@ -314,14 +483,14 @@
             </div>
           </div>
 
-          <div class="project-card">
+          <div class="project-card" data-hex="#B8F0">
             <a href="https://cvskinshop.com" target="_blank">
               <img src="assets/images/106.jpg" alt="CV Skin Shop" class="project-thumb" />
             </a>
             <div class="project-body">
               <span class="project-tag">Beauty · E-Commerce</span>
               <div class="project-title">CV Skin Shop</div>
-              <div class="project-desc">A beauty and skincare e-commerce website for CV Skin Shop, featuring product showcases, online shopping, and a clean customer-focused experience.</div>
+              <div class="project-desc">A beauty and skincare e-commerce site for CV Skin Shop, featuring product showcases, online shopping, and a clean customer-focused experience.</div>
               <div class="project-stack">
                 <span class="stack-pill">WordPress</span><span class="stack-pill">WooCommerce</span>
                 <span class="stack-pill">PHP</span><span class="stack-pill">Responsive Design</span>
@@ -329,14 +498,14 @@
             </div>
           </div>
 
-          <div class="project-card">
+          <div class="project-card" data-hex="#4A9C">
             <a href="https://www.lynkxs.com/" target="_blank">
               <img src="assets/images/107.png" alt="LynkXS" class="project-thumb" />
             </a>
             <div class="project-body">
               <span class="project-tag">B2B · Global Marketplace</span>
               <div class="project-title">LynkXS</div>
-              <div class="project-desc">A hybrid Laravel and WordPress platform for LynkXS, featuring a modern B2B marketplace experience and scalable web functionality for global trade and sourcing services.</div>
+              <div class="project-desc">A hybrid Laravel and WordPress platform for LynkXS — a modern B2B marketplace for global trade and sourcing services.</div>
               <div class="project-stack">
                 <span class="stack-pill">Laravel</span><span class="stack-pill">WordPress</span>
                 <span class="stack-pill">PHP</span><span class="stack-pill">MySQL</span>
@@ -344,14 +513,14 @@
             </div>
           </div>
 
-          <div class="project-card">
+          <div class="project-card" data-hex="#2E7F">
             <a href="https://play.google.com/store/apps/details?id=com.myoptimind.ecoikot" target="_blank">
               <img src="assets/images/108.png" alt="Eco-Ikot App" class="project-thumb" />
             </a>
             <div class="project-body">
               <span class="project-tag">Mobile App · Sustainability</span>
               <div class="project-title">Eco-Ikot App</div>
-              <div class="project-desc">Backend development for the Eco-Ikot mobile application using Laravel — API development, database management, authentication, and scalable backend services.</div>
+              <div class="project-desc">Backend development for the Eco-Ikot mobile app using Laravel — API development, database management, authentication, and scalable backend services.</div>
               <div class="project-stack">
                 <span class="stack-pill">Laravel</span><span class="stack-pill">REST API</span>
                 <span class="stack-pill">PHP</span><span class="stack-pill">MySQL</span>
@@ -361,11 +530,21 @@
 
         </div>
       </div>
+
+      <div class="see-more-wrap">
+        <button class="btn-ghost" id="see-more-btn" onclick="toggleAllProjects()">[ LOAD_MORE_PROJECTS ]</button>
+      </div>
+      <div id="all-projects-grid"></div>
     </section>
 
-    <!-- ── TECH STACK ── -->
-    <section id="tech" style="min-height:auto; padding-bottom:5rem;">
+    <!-- ══════════════════════════════════════
+         TECH STACK
+    ═══════════════════════════════════════ -->
+    <section id="tech" style="--sec-delay:3;min-height:auto;padding-bottom:5rem;">
+      <div class="sec-corner tl"></div>
+      <div class="sec-corner tr"></div>
       <div class="hex-bg"></div>
+
       <div class="section-tag">Operational Loadout</div>
       <h2 class="section-title">Technology Stack</h2>
 
@@ -408,11 +587,15 @@
       </div>
     </section>
 
-    <!-- ── BLOG ── -->
-    <section id="blog" style="min-height:auto; padding-bottom:5rem;">
+    <!-- ══════════════════════════════════════
+         BLOG
+    ═══════════════════════════════════════ -->
+    <section id="blog" style="--sec-delay:4;min-height:auto;padding-bottom:5rem;">
+      <div class="sec-corner tl"></div>
+      <div class="sec-corner tr"></div>
       <div class="hex-bg"></div>
       <div class="parallax-layer" data-depth="0.12" style="position:absolute;inset:0;pointer-events:none;z-index:0;">
-        <div class="grid-bg" style="opacity:.04;"></div>
+        <div class="grid-bg"></div>
       </div>
 
       <div class="section-tag">Field Logs // On Duty</div>
@@ -435,8 +618,6 @@
           </div>
         </div>
 
-        
-
         <div class="blog-card reveal" style="animation-delay:.2s">
           <div class="blog-img-wrap">
             <img src="assets/images/blog2.jpg" alt="Training Session" class="blog-img" />
@@ -449,26 +630,30 @@
           <div class="blog-body">
             <div class="blog-title">Training Government Staff on the New System</div>
             <div class="blog-desc">Running a hands-on walkthrough with TMO employees — showing them how to register drivers, generate QR codes, and export records. A UI is only as good as the people who can use it confidently.</div>
-            
           </div>
         </div>
-
-        
 
       </div>
     </section>
 
-    <!-- ── CONTACT ── -->
-    <section id="contact">
+    <!-- ══════════════════════════════════════
+         CONTACT
+    ═══════════════════════════════════════ -->
+    <section id="contact" style="--sec-delay:5">
+      <div class="sec-corner tl"></div>
+      <div class="sec-corner tr"></div>
+      <div class="sec-corner bl"></div>
+      <div class="sec-corner br"></div>
+
       <div class="parallax-layer" data-depth="0.1" style="position:absolute;inset:0;pointer-events:none;z-index:0;">
-        <div class="circuit-bg" style="opacity:.04;"></div>
+        <div class="circuit-bg"></div>
       </div>
       <div class="section-tag">Open Channel</div>
       <h2 class="section-title">Contact</h2>
 
       <div class="contact-layout">
         <div>
-          <p style="font-size:.82rem;color:var(--muted);line-height:1.8;margin-bottom:1.5rem;">
+          <p style="font-size:.8rem;color:var(--muted);line-height:1.9;margin-bottom:1.6rem;">
             Open to new projects, collaborations, or just a good tech conversation. Drop a message — response time is usually within 24 hours.
           </p>
           <div class="contact-info-list reveal">
@@ -510,7 +695,7 @@
   <!-- FOOTER -->
   <footer>
     <div class="footer-brand">MARK JEZREEL MARTINEZ // FULL-STACK ENGINEER</div>
-    <div class="footer-copy">© 2025 Mark. Built with ☕ + 💻 in Valenzuela City, PH</div>
+    <div class="footer-copy">© 2026 Mark. Built with ☕ + 💻 in Valenzuela City, PH</div>
     <div class="footer-links">
       <a href="#home">Top</a>
       <a href="#projects">Projects</a>
@@ -520,5 +705,45 @@
   </footer>
 
   <script src="assets/js/main.js"></script>
+
+  <!-- INLINE EXTRAS: HUD clock + mouse coords + loader removal -->
+  <script>
+    // HUD clock
+    function updateClock() {
+      const now = new Date();
+      const t = [now.getHours(), now.getMinutes(), now.getSeconds()]
+        .map(n => String(n).padStart(2, '0')).join(':');
+      const el = document.getElementById('hud-clock');
+      if (el) el.textContent = t;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // HUD mouse coords
+    document.addEventListener('mousemove', e => {
+      const xEl = document.getElementById('hud-x');
+      const yEl = document.getElementById('hud-y');
+      if (xEl) xEl.textContent = 'X: ' + String(e.clientX).padStart(4, '0');
+      if (yEl) yEl.textContent = 'Y: ' + String(e.clientY).padStart(4, '0');
+    }, { passive: true });
+
+    // HUD current section
+    const secNames = { home: 'HOME', about: 'PROFILE', projects: 'PROJECTS', tech: 'STACK', blog: 'LOGS', contact: 'CONTACT' };
+    window.addEventListener('scroll', () => {
+      const secs = document.querySelectorAll('section[id]');
+      let cur = 'HOME';
+      secs.forEach(s => { if (window.scrollY >= s.offsetTop - 130) cur = secNames[s.id] || s.id.toUpperCase(); });
+      const el = document.getElementById('hud-section');
+      if (el) el.textContent = 'SEC: ' + cur;
+    }, { passive: true });
+
+    // Remove loader after load
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        const loader = document.getElementById('quantum-loader');
+        if (loader) { loader.style.opacity = '0'; loader.style.transition = 'opacity .5s'; setTimeout(() => loader.remove(), 500); }
+      }, 800);
+    });
+  </script>
 </body>
 </html>
