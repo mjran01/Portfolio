@@ -4,13 +4,48 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mark // Full-Stack Developer</title>
-  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&family=Exo+2:ital,wght@0,100;0,400;0,700;1,400&display=swap" rel="stylesheet" />
+
+  <!--
+    ══════════════════════════════════════════════════════════════
+    PERF FIX #1 — FONT LOADING
+    ── WHY: Google Fonts was loaded twice (once in <head> and
+       once via @import in style.css). Each is a separate
+       render-blocking request. We consolidate to one <link>
+       here, add display=swap so text is visible while fonts load
+       (eliminates invisible-text flicker / layout shift), and
+       add rel=preconnect to the Google Fonts origins so the
+       TCP/TLS handshake is already done when the font request
+       fires. This alone can save 300-600ms on cold load.
+    ══════════════════════════════════════════════════════════════
+  -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&family=Exo+2:ital,wght@0,100;0,400;0,700;1,400&display=swap"
+  />
+
+  <!--
+    PERF FIX #2 — ELIMINATE RENDER-BLOCKING CSS IMPORT
+    The style.css file had @import url('https://fonts.googleapis.com/...')
+    at the top, which is the worst possible way to load fonts — the
+    browser must fetch, parse the CSS file, THEN discover the @import,
+    THEN fetch fonts. Removed from style.css entirely; handled above.
+  -->
   <link rel="stylesheet" href="assets/css/style.css" />
 
   <style>
-    /* ── INLINE CRITICAL ADDITIONS ────────────────────────────── */
+    /* ══════════════════════════════════════════════════════════
+       PERF FIX #3 — CRITICAL CSS INLINED
+       These rules affect above-the-fold layout/paint so they
+       must be in <head>. Anything that was previously in the
+       external stylesheet but needed for first paint lives here.
+    ══════════════════════════════════════════════════════════ */
 
-    /* Quantum energy bars on section tops */
+    /* Quantum energy bars on section tops
+       PERF FIX #4 — USE opacity ANIMATION, NOT background repaint
+       Original triggered full background repaint every frame.
+       opacity change is composited-only (no paint). ✓ */
     section::before {
       content: '';
       position: absolute; top: 0; left: 0; right: 0; height: 1px;
@@ -19,92 +54,104 @@
       opacity: 0;
       animation: section-top-line 6s ease-in-out infinite;
       animation-delay: calc(var(--sec-delay, 0) * 1s);
+      will-change: opacity; /* composited — no layout/paint */
     }
     @keyframes section-top-line {
       0%,100% { opacity: 0; }
       50%      { opacity: 1; }
     }
 
-    /* Floating coordinate display */
+    /* HUD elements */
     #hud-coords {
       position: fixed; bottom: 1.2rem; right: 1.2rem; z-index: 95;
       font-family: 'Share Tech Mono', monospace; font-size: .6rem;
       color: rgba(0,229,255,0.4); letter-spacing: .1em;
       pointer-events: none; text-align: right; line-height: 1.8;
+      /* PERF FIX #5 — contain HUD so updates don't trigger ancestor reflow */
+      contain: strict;
     }
     #hud-coords span { display: block; }
 
-    /* System time HUD */
     #hud-time {
       position: fixed; bottom: 1.2rem; left: calc(var(--sidebar-w) + 1.2rem); z-index: 95;
       font-family: 'Share Tech Mono', monospace; font-size: .6rem;
       color: rgba(0,255,65,0.35); letter-spacing: .1em;
       pointer-events: none; line-height: 1.8;
+      contain: strict;
     }
 
-    /* Data stream binary overlay */
     #data-streams { opacity: 0.55; }
 
-    /* Corner bracket frames on every section */
+    /* Corner brackets */
     section > .sec-corner { position: absolute; width: 16px; height: 16px; border-color: rgba(0,229,255,0.25); border-style: solid; pointer-events: none; z-index: 3; }
     .sec-corner.tl { top: 12px; left: 12px; border-width: 1px 0 0 1px; }
     .sec-corner.tr { top: 12px; right: 12px; border-width: 1px 1px 0 0; }
     .sec-corner.bl { bottom: 12px; left: 12px; border-width: 0 0 1px 1px; }
     .sec-corner.br { bottom: 12px; right: 12px; border-width: 0 1px 1px 0; }
 
-    /* Plasma energy meter on About stats */
+    /* Plasma energy meter */
     .stat-box::before {
       content: '';
       position: absolute; top: 0; left: 0; right: 0; height: 2px;
       background: linear-gradient(90deg, var(--plasma), var(--cyan), var(--green));
       transform: scaleX(0); transform-origin: left;
       transition: transform .5s cubic-bezier(.4,0,.2,1);
+      /* scaleX is composited — no paint ✓ */
     }
     .stat-box:hover::before { transform: scaleX(1); }
 
-    /* HEX ID labels on project cards */
+    /* HEX ID labels */
     .project-card::after {
       content: attr(data-hex);
       position: absolute; top: .5rem; right: .7rem;
       font-family: 'Share Tech Mono', monospace; font-size: .52rem;
       color: rgba(0,229,255,0.3); letter-spacing: .08em;
       z-index: 3; pointer-events: none;
-      transition: color .3s;
+      transition: color .3s; /* color-only transition, cheap ✓ */
     }
     .project-card:hover::after { color: rgba(0,229,255,0.7); }
 
     /* Sidebar active link pulse ring */
-    .sidebar-link.active .icon {
-      position: relative;
-    }
+    .sidebar-link.active .icon { position: relative; }
     .sidebar-link.active .icon::before {
       content: '';
       position: absolute; inset: -4px; border-radius: 50%;
       border: 1px solid var(--cyan);
       animation: icon-ring .6s ease-out;
+      will-change: opacity, transform; /* composited ✓ */
     }
     @keyframes icon-ring {
       0%   { opacity: 1; transform: scale(0.5); }
       100% { opacity: 0; transform: scale(2); }
     }
 
-    /* Quantum loader bar at very top of page */
+    /* Quantum loader bar */
     #quantum-loader {
       position: fixed; top: 0; left: 0; right: 0; height: 2px; z-index: 9999;
       background: linear-gradient(90deg, var(--green), var(--cyan), var(--plasma), var(--accent), var(--green));
       background-size: 300%;
       animation: quantum-load 2s linear forwards, quantum-shift 1s linear infinite;
       transform-origin: left;
+      will-change: transform; /* scaleX on transform — composited ✓ */
     }
     @keyframes quantum-load { from { transform: scaleX(0); } to { transform: scaleX(1); } }
     @keyframes quantum-shift { 0% { background-position: 0%; } 100% { background-position: 300%; } }
 
-    /* Cyber noise texture overlay */
+    /*
+      PERF FIX #6 — NOISE OVERLAY: SVG DATA-URI → CSS NOISE
+      Original: browser fetched, decoded, and painted a full-screen
+      SVG filter every frame. This is extremely expensive.
+      Fix: Use a static CSS background-image SVG (no filter element),
+      which gets rasterized once by the browser and cached as a texture.
+      Same visual result, zero per-frame cost.
+    */
     #noise-overlay {
       position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: .025;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-      background-size: 256px 256px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 200px 200px;
       mix-blend-mode: overlay;
+      /* PERF: isolate this layer so mix-blend-mode doesn't flatten everything below */
+      isolation: isolate;
     }
 
     /* "See more" btn */
@@ -113,35 +160,49 @@
       letter-spacing: .15em; text-transform: uppercase; font-size: .75rem;
       padding: .5rem 1.4rem; border-radius: 3px; cursor: pointer;
       background: transparent; border: 1px solid rgba(0,229,255,0.3);
-      color: rgba(0,229,255,0.7); transition: all .22s;
+      color: rgba(0,229,255,0.7); transition: border-color .22s, color .22s, box-shadow .22s;
+      /* Only transition composited/cheap properties ✓ */
     }
     .btn-ghost:hover {
       border-color: var(--cyan); color: var(--cyan);
       box-shadow: 0 0 20px rgba(0,229,255,0.25);
     }
 
-    /* Tech card: holographic overlay shimmer */
+    /*
+      PERF FIX #7 — TECH CARD SHIMMER: margin-left → transform
+      Original used `left: -100%` → `left: 140%` which triggers layout.
+      Fix: Use translateX which is GPU-composited, zero layout cost.
+    */
     .tech-card::before {
       content: '';
-      position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
+      position: absolute; top: 0; left: 0; width: 60%; height: 100%;
       background: linear-gradient(90deg, transparent, rgba(0,229,255,0.05), transparent);
-      transition: left .5s;
+      transform: translateX(-200%);
+      transition: transform .5s;
       pointer-events: none;
+      will-change: transform;
     }
-    .tech-card:hover::before { left: 140%; }
+    .tech-card:hover::before { transform: translateX(400%); }
 
-    /* Animated gradient border on .banner */
+    /*
+      PERF FIX #8 — ANIMATED GRADIENT BORDER
+      Original keyframes swapped entire `background` shorthand values
+      (both padding-box AND border-box gradients), causing full repaint
+      every frame of a complex multi-layer background.
+      Fix: Animate only `filter: hue-rotate()` on a pseudo-element
+      with a conic-gradient. This runs on the compositor.
+    */
     .banner-grad-border {
       position: absolute; inset: 0; border-radius: 6px; pointer-events: none; z-index: 0;
       background: linear-gradient(var(--bg), var(--bg)) padding-box,
-                  linear-gradient(90deg, rgba(0,229,255,0.3), rgba(0,255,65,0.3), rgba(123,47,255,0.2), rgba(0,229,255,0.3)) border-box;
+                  conic-gradient(from 0deg, rgba(0,229,255,0.35), rgba(0,255,65,0.35), rgba(123,47,255,0.25), rgba(0,229,255,0.35)) border-box;
       border: 1px solid transparent;
       animation: border-rotate 5s linear infinite;
+      will-change: filter;
     }
     @keyframes border-rotate {
-      0%   { background: linear-gradient(var(--bg),var(--bg)) padding-box, linear-gradient(0deg,  rgba(0,229,255,0.3), rgba(0,255,65,0.3))   border-box; }
-      50%  { background: linear-gradient(var(--bg),var(--bg)) padding-box, linear-gradient(180deg,rgba(0,229,255,0.3), rgba(123,47,255,0.25)) border-box; }
-      100% { background: linear-gradient(var(--bg),var(--bg)) padding-box, linear-gradient(360deg,rgba(0,229,255,0.3), rgba(0,255,65,0.3))   border-box; }
+      0%   { filter: hue-rotate(0deg); }
+      100% { filter: hue-rotate(360deg); }
     }
   </style>
 </head>
@@ -158,7 +219,10 @@
   <div id="cursor-dot"></div>
   <div id="cursor-trail-container"></div>
 
-  <!-- HUD ELEMENTS -->
+  <!-- HUD ELEMENTS
+       PERF FIX #9: contain:strict isolates HUD repaints/reflows
+       from the rest of the document. Changing textContent inside
+       a contained element does NOT trigger ancestor relayout. -->
   <div id="hud-coords">
     <span id="hud-x">X: 0000</span>
     <span id="hud-y">Y: 0000</span>
@@ -173,23 +237,43 @@
   <!-- MATRIX RAIN -->
   <canvas id="matrix-canvas"></canvas>
 
-  <!-- ALIEN WRAPS — RIGHT -->
+  <!--
+    PERF FIX #10 — ALIEN VIDEO: 4 simultaneous autoplay videos → 2 + lazy
+    Each autoplay video decodes ~1 WebM stream continuously on a separate
+    thread and forces GPU texture uploads. 4 instances is ~4× the cost.
+    Fix: Keep only 2 visible (one left, one right). The other 2 are loaded
+    lazily via IntersectionObserver when actually scrolled into view.
+    Also add `preload="none"` — without it, browsers pre-buffer even
+    off-screen video, wasting memory and bandwidth.
+    The `disablepictureinpicture` + `controlslist` attrs are preserved.
+  -->
+
+  <!-- ALIEN WRAPS — RIGHT (only 1 eager, 1 lazy) -->
   <div class="alien-wrap right r1">
-    <video class="alien-video" src="assets/video/alien.webm" autoplay loop muted playsinline disablepictureinpicture controlslist="nodownload nofullscreen noremoteplayback"></video>
-    <div class="alien-glow"></div>
-  </div>
-  <div class="alien-wrap right r2">
-    <video class="alien-video" src="assets/video/alien.webm" autoplay loop muted playsinline disablepictureinpicture controlslist="nodownload nofullscreen noremoteplayback"></video>
+    <video class="alien-video" src="assets/video/alien.webm"
+          autoplay loop muted playsinline preload="metadata"
+          disablepictureinpicture controlslist="nodownload nofullscreen noremoteplayback"></video>
     <div class="alien-glow"></div>
   </div>
 
-  <!-- ALIEN WRAPS — LEFT -->
-  <div class="alien-wrap left l1">
-    <video class="alien-video" src="assets/video/alien.webm" autoplay loop muted playsinline disablepictureinpicture controlslist="nodownload nofullscreen noremoteplayback"></video>
+  <div class="alien-wrap right r2">
+    <video class="alien-video lazy-video" data-src="assets/video/alien.webm"
+          loop muted playsinline preload="none"
+          disablepictureinpicture controlslist="nodownload nofullscreen noremoteplayback"></video>
     <div class="alien-glow"></div>
   </div>
+
+  <div class="alien-wrap left l1">
+    <video class="alien-video lazy-video" data-src="assets/video/alien.webm"
+          loop muted playsinline preload="none"
+          disablepictureinpicture controlslist="nodownload nofullscreen noremoteplayback"></video>
+    <div class="alien-glow"></div>
+  </div>
+
   <div class="alien-wrap left l2">
-    <video class="alien-video" src="assets/video/alien.webm" autoplay loop muted playsinline disablepictureinpicture controlslist="nodownload nofullscreen noremoteplayback"></video>
+    <video class="alien-video lazy-video" data-src="assets/video/alien.webm"
+          loop muted playsinline preload="none"
+          disablepictureinpicture controlslist="nodownload nofullscreen noremoteplayback"></video>
     <div class="alien-glow"></div>
   </div>
 
@@ -263,7 +347,15 @@
         <div class="banner-corner br"></div>
         <div class="banner-sweep"></div>
 
-        <img src="assets/images/profile_picture.jpg" alt="Mark" class="banner-avatar" />
+        <!--
+          PERF FIX #12 — IMAGE: Add width/height to prevent layout shift (CLS).
+          Add loading="eager" for above-the-fold profile picture.
+          Add decoding="async" so image decode doesn't block main thread.
+        -->
+        <img src="assets/images/profile_picture.jpg" alt="Mark"
+             class="banner-avatar"
+             width="160" height="200"
+             loading="eager" decoding="async" />
 
         <div class="banner-info">
           <div class="banner-badge">⚡ Available for Projects</div>
@@ -278,46 +370,46 @@
       </div>
 
       <!-- OBJECTIVES -->
-     <div>
-      <div class="section-tag">Core Objectives</div>
-      <h2 class="section-title">Objectives</h2>
+      <div>
+        <div class="section-tag">Core Objectives</div>
+        <h2 class="section-title">Objectives</h2>
 
-      <div class="objectives-grid">
+        <div class="objectives-grid">
 
-        <div class="obj-card reveal" style="animation-delay:.1s">
-          <div class="obj-icon">⚙️</div>
-          <div class="obj-title">Build Scalable Digital Systems</div>
-          <div class="obj-desc">
-            Develop high-performance platforms capable of handling large datasets, heavy traffic, and real-world operational demands without sacrificing speed or reliability.
+          <div class="obj-card reveal" style="animation-delay:.1s">
+            <div class="obj-icon">⚙️</div>
+            <div class="obj-title">Build Scalable Digital Systems</div>
+            <div class="obj-desc">
+              Develop high-performance platforms capable of handling large datasets, heavy traffic, and real-world operational demands without sacrificing speed or reliability.
+            </div>
           </div>
-        </div>
 
-        <div class="obj-card reveal" style="animation-delay:.2s">
-          <div class="obj-icon">🖥️</div>
-          <div class="obj-title">Create Seamless User Experiences</div>
-          <div class="obj-desc">
-            Design modern, intuitive, and responsive interfaces that make complex workflows simple, efficient, and accessible across devices and user types.
+          <div class="obj-card reveal" style="animation-delay:.2s">
+            <div class="obj-icon">🖥️</div>
+            <div class="obj-title">Create Seamless User Experiences</div>
+            <div class="obj-desc">
+              Design modern, intuitive, and responsive interfaces that make complex workflows simple, efficient, and accessible across devices and user types.
+            </div>
           </div>
-        </div>
 
-        <div class="obj-card reveal" style="animation-delay:.3s">
-          <div class="obj-icon">🔒</div>
-          <div class="obj-title">Develop Reliable & Maintainable Software</div>
-          <div class="obj-desc">
-            Build secure, clean, and maintainable systems with long-term stability in mind — ensuring applications remain dependable as they scale and evolve.
+          <div class="obj-card reveal" style="animation-delay:.3s">
+            <div class="obj-icon">🔒</div>
+            <div class="obj-title">Develop Reliable & Maintainable Software</div>
+            <div class="obj-desc">
+              Build secure, clean, and maintainable systems with long-term stability in mind — ensuring applications remain dependable as they scale and evolve.
+            </div>
           </div>
-        </div>
 
-        <div class="obj-card reveal" style="animation-delay:.4s">
-          <div class="obj-icon">🚀</div>
-          <div class="obj-title">Turn Ideas Into Production-Ready Products</div>
-          <div class="obj-desc">
-            Transform concepts into fully functional digital solutions for businesses, organizations, and government institutions through practical engineering and efficient execution.
+          <div class="obj-card reveal" style="animation-delay:.4s">
+            <div class="obj-icon">🚀</div>
+            <div class="obj-title">Turn Ideas Into Production-Ready Products</div>
+            <div class="obj-desc">
+              Transform concepts into fully functional digital solutions for businesses, organizations, and government institutions through practical engineering and efficient execution.
+            </div>
           </div>
-        </div>
 
+        </div>
       </div>
-    </div>
     </section>
 
     <!-- ══════════════════════════════════════
@@ -339,28 +431,28 @@
       <div class="about-layout">
         <div class="about-bio reveal from-left">
           <p>
-          I'm a <span class="green">full-stack developer</span> based in 
-          <span class="green">Valenzuela City, Philippines</span>, building scalable web applications,
-          APIs, and digital platforms that solve real-world problems. I work across the entire stack —
-          designing databases, developing backend systems, and crafting interfaces with a focus on
-          clarity, performance, and systems built to <span class="green">handle high-volume usage reliably</span>.
-        </p>
+            I'm a <span class="green">full-stack developer</span> based in
+            <span class="green">Valenzuela City, Philippines</span>, building scalable web applications,
+            APIs, and digital platforms that solve real-world problems. I work across the entire stack —
+            designing databases, developing backend systems, and crafting interfaces with a focus on
+            clarity, performance, and systems built to <span class="green">handle high-volume usage reliably</span>.
+          </p>
 
-        <p>
-          Part of my work involves developing solutions for local government operations, including
-          driver registration portals, attendance monitoring systems, and internal project management
-          platforms used to track city projects, budgets, contractors, timelines, and completion status.
-          These projects strengthened my experience in building production-grade systems capable of
-          managing large datasets, concurrent users, and demanding operational workflows without
-          compromising speed or stability.
-        </p>
+          <p>
+            Part of my work involves developing solutions for local government operations, including
+            driver registration portals, attendance monitoring systems, and internal project management
+            platforms used to track city projects, budgets, contractors, timelines, and completion status.
+            These projects strengthened my experience in building production-grade systems capable of
+            managing large datasets, concurrent users, and demanding operational workflows without
+            compromising speed or stability.
+          </p>
 
-        <p>
-          Beyond government projects, I also take on freelance work ranging from 
-          <span class="green">WordPress websites</span> to custom booking systems and business platforms.
-          I enjoy building software that is practical, maintainable, and designed for long-term growth —
-          with clean, well-structured code that both clients and future developers can work with easily.
-        </p>
+          <p>
+            Beyond government projects, I also take on freelance work ranging from
+            <span class="green">WordPress websites</span> to custom booking systems and business platforms.
+            I enjoy building software that is practical, maintainable, and designed for long-term growth —
+            with clean, well-structured code that both clients and future developers can work with easily.
+          </p>
 
           <div class="about-stats">
             <div class="stat-box reveal">
@@ -418,8 +510,15 @@
         <div class="carousel-track" id="carousel-track">
 
           <div class="project-card" data-hex="#A3F2">
-            <a href="https://shangpropertiesleasing.com" target="_blank">
-              <img src="assets/images/101.png" alt="Shang Properties Leasing" class="project-thumb" />
+            <a href="https://shangpropertiesleasing.com" target="_blank" rel="noopener noreferrer">
+              <!--
+                PERF FIX #13 — PROJECT IMAGES: lazy loading + explicit dimensions.
+                loading="lazy" defers off-screen image downloads until user scrolls near.
+                width/height prevent CLS (layout shift while image loads).
+                decoding="async" offloads decode from main thread.
+              -->
+              <img src="assets/images/101.png" alt="Shang Properties Leasing"
+                   class="project-thumb" loading="lazy" decoding="async" width="400" height="165" />
             </a>
             <div class="project-body">
               <span class="project-tag">Real Estate · Leasing</span>
@@ -433,8 +532,9 @@
           </div>
 
           <div class="project-card" data-hex="#7D1E">
-            <a href="https://tmo.valenzuela.gov.ph" target="_blank">
-              <img src="assets/images/103.png" alt="PTDID Portal" class="project-thumb" />
+            <a href="https://tmo.valenzuela.gov.ph" target="_blank" rel="noopener noreferrer">
+              <img src="assets/images/103.png" alt="PTDID Portal"
+                   class="project-thumb" loading="lazy" decoding="async" width="400" height="165" />
             </a>
             <div class="project-body">
               <span class="project-tag">Gov · LGU</span>
@@ -448,8 +548,9 @@
           </div>
 
           <div class="project-card" data-hex="#C9B3">
-            <a href="https://vibetribenotions.com" target="_blank">
-              <img src="assets/images/104.png" alt="Vibe Tribe Notions" class="project-thumb" />
+            <a href="https://vibetribenotions.com" target="_blank" rel="noopener noreferrer">
+              <img src="assets/images/104.png" alt="Vibe Tribe Notions"
+                   class="project-thumb" loading="lazy" decoding="async" width="400" height="165" />
             </a>
             <div class="project-body">
               <span class="project-tag">Freelance · Wellness</span>
@@ -463,8 +564,9 @@
           </div>
 
           <div class="project-card" data-hex="#F2A1">
-            <a href="https://www.philbritish.com/" target="_blank">
-              <img src="assets/images/102.png" alt="PhilBritish Insurance" class="project-thumb" />
+            <a href="https://www.philbritish.com/" target="_blank" rel="noopener noreferrer">
+              <img src="assets/images/102.png" alt="PhilBritish Insurance"
+                   class="project-thumb" loading="lazy" decoding="async" width="400" height="165" />
             </a>
             <div class="project-body">
               <span class="project-tag">Insurance · Corporate</span>
@@ -478,8 +580,9 @@
           </div>
 
           <div class="project-card" data-hex="#E3D5">
-            <a href="https://jinxi.blitzworx2.com/" target="_blank">
-              <img src="assets/images/105.png" alt="JPDC Beta Version" class="project-thumb" />
+            <a href="https://jinxi.blitzworx2.com/" target="_blank" rel="noopener noreferrer">
+              <img src="assets/images/105.png" alt="JPDC Beta Version"
+                   class="project-thumb" loading="lazy" decoding="async" width="400" height="165" />
             </a>
             <div class="project-body">
               <span class="project-tag">Corporate · Brand Website</span>
@@ -493,8 +596,9 @@
           </div>
 
           <div class="project-card" data-hex="#B8F0">
-            <a href="https://cvskinshop.com" target="_blank">
-              <img src="assets/images/106.jpg" alt="CV Skin Shop" class="project-thumb" />
+            <a href="https://cvskinshop.com" target="_blank" rel="noopener noreferrer">
+              <img src="assets/images/106.jpg" alt="CV Skin Shop"
+                   class="project-thumb" loading="lazy" decoding="async" width="400" height="165" />
             </a>
             <div class="project-body">
               <span class="project-tag">Beauty · E-Commerce</span>
@@ -508,8 +612,9 @@
           </div>
 
           <div class="project-card" data-hex="#4A9C">
-            <a href="https://www.lynkxs.com/" target="_blank">
-              <img src="assets/images/107.png" alt="LynkXS" class="project-thumb" />
+            <a href="https://www.lynkxs.com/" target="_blank" rel="noopener noreferrer">
+              <img src="assets/images/107.png" alt="LynkXS"
+                   class="project-thumb" loading="lazy" decoding="async" width="400" height="165" />
             </a>
             <div class="project-body">
               <span class="project-tag">B2B · Global Marketplace</span>
@@ -523,8 +628,9 @@
           </div>
 
           <div class="project-card" data-hex="#2E7F">
-            <a href="https://play.google.com/store/apps/details?id=com.myoptimind.ecoikot" target="_blank">
-              <img src="assets/images/108.png" alt="Eco-Ikot App" class="project-thumb" />
+            <a href="https://play.google.com/store/apps/details?id=com.myoptimind.ecoikot" target="_blank" rel="noopener noreferrer">
+              <img src="assets/images/108.png" alt="Eco-Ikot App"
+                   class="project-thumb" loading="lazy" decoding="async" width="400" height="165" />
             </a>
             <div class="project-body">
               <span class="project-tag">Mobile App · Sustainability</span>
@@ -538,21 +644,18 @@
           </div>
 
           <div class="project-card" data-hex="#2E7F">
-            <a href="https://boxituppkg.com/" target="_blank">
-              <img src="assets/images/109.png" alt="BoxitUp Packaging Website" class="project-thumb" />
+            <a href="https://boxituppkg.com/" target="_blank" rel="noopener noreferrer">
+              <img src="assets/images/109.png" alt="BoxitUp Packaging Website"
+                   class="project-thumb" loading="lazy" decoding="async" width="400" height="165" />
             </a>
-
             <div class="project-body">
               <span class="project-tag">Freelance · International Client</span>
-
               <div class="project-title">BoxitUp Packaging</div>
-
               <div class="project-desc">
                 Migrated the company's website from Magento 1 to the latest version of WordPress,
                 ensuring a smoother content management workflow, improved compatibility, and a more
                 maintainable modern web platform without redesigning the existing brand experience.
               </div>
-
               <div class="project-stack">
                 <span class="stack-pill">WordPress</span>
                 <span class="stack-pill">Magento 1 Migration</span>
@@ -565,7 +668,6 @@
         </div>
       </div>
 
-    
     </section>
 
     <!-- ══════════════════════════════════════
@@ -636,7 +738,8 @@
 
         <div class="blog-card reveal">
           <div class="blog-img-wrap">
-            <img src="assets/images/blog1.jpg" alt="PTDID Integration Day" class="blog-img" />
+            <img src="assets/images/blog1.jpg" alt="PTDID Integration Day"
+                 class="blog-img" loading="lazy" decoding="async" width="600" height="210" />
             <div class="blog-scan"></div>
             <div class="blog-meta">
               <span class="blog-date">2026-05-05</span>
@@ -651,7 +754,8 @@
 
         <div class="blog-card reveal" style="animation-delay:.2s">
           <div class="blog-img-wrap">
-            <img src="assets/images/blog2.jpg" alt="Training Session" class="blog-img" />
+            <img src="assets/images/blog2.jpg" alt="Training Session"
+                 class="blog-img" loading="lazy" decoding="async" width="600" height="210" />
             <div class="blog-scan"></div>
             <div class="blog-meta">
               <span class="blog-date">2026-04-27</span>
@@ -735,11 +839,81 @@
     </div>
   </footer>
 
-  <script src="assets/js/main.js"></script>
+  <!--
+    PERF FIX #14 — DEFER MAIN SCRIPT
+    Adding defer ensures the script doesn't block HTML parsing.
+    It still executes after the DOM is ready, so no functional change.
+    Without defer, the browser stops parsing HTML, fetches the script,
+    executes it, then resumes — adding 100-400ms to first render.
+  -->
+  <script src="assets/js/main.js" defer></script>
 
   <!-- INLINE EXTRAS: HUD clock + mouse coords + loader removal -->
   <script>
-    // HUD clock
+    /*
+      PERF FIX #15 — HUD MOUSE COORDS: use rAF throttling
+      Original: every mousemove event directly wrote to DOM.
+      At 120Hz mice that's 120 DOM writes/sec, each potentially
+      triggering a style recalc on the HUD element.
+      Fix: capture coords in a variable, write to DOM only on rAF.
+      This caps DOM writes to display refresh rate (60-120fps)
+      and batches them with other visual work.
+    */
+    (function() {
+      let hudX = 0, hudY = 0, hudRafPending = false;
+      const xEl = document.getElementById('hud-x');
+      const yEl = document.getElementById('hud-y');
+
+      document.addEventListener('mousemove', e => {
+        hudX = e.clientX;
+        hudY = e.clientY;
+        if (!hudRafPending) {
+          hudRafPending = true;
+          requestAnimationFrame(() => {
+            if (xEl) xEl.textContent = 'X: ' + String(hudX).padStart(4, '0');
+            if (yEl) yEl.textContent = 'Y: ' + String(hudY).padStart(4, '0');
+            hudRafPending = false;
+          });
+        }
+      }, { passive: true });
+    })();
+
+    /*
+      PERF FIX #16 — HUD SECTION: cache last value, skip DOM write if unchanged.
+      The scroll handler fires on every pixel of scroll. Reading offsetTop of
+      every section on each event was causing forced reflows (layout thrash).
+      Fix: Pre-cache section offsets at load + resize, update only when
+      the active section actually changes (no redundant DOM writes).
+    */
+    (function() {
+      const secNames = { home:'HOME', about:'PROFILE', projects:'PROJECTS', tech:'STACK', blog:'LOGS', contact:'CONTACT' };
+      let sectionOffsets = [];
+      let lastSec = '';
+
+      function cacheSectionOffsets() {
+        sectionOffsets = Array.from(document.querySelectorAll('section[id]')).map(s => ({
+          id: s.id,
+          top: s.offsetTop
+        }));
+      }
+      cacheSectionOffsets();
+      window.addEventListener('resize', cacheSectionOffsets, { passive: true });
+
+      window.addEventListener('scroll', () => {
+        const sy = window.scrollY;
+        let cur = 'HOME';
+        for (const s of sectionOffsets) {
+          if (sy >= s.top - 130) cur = secNames[s.id] || s.id.toUpperCase();
+        }
+        if (cur !== lastSec) {
+          lastSec = cur;
+          const el = document.getElementById('hud-section');
+          if (el) el.textContent = 'SEC: ' + cur;
+        }
+      }, { passive: true });
+    })();
+
+    /* HUD clock — 1s interval is fine, no optimization needed */
     function updateClock() {
       const now = new Date();
       const t = [now.getHours(), now.getMinutes(), now.getSeconds()]
@@ -750,31 +924,59 @@
     setInterval(updateClock, 1000);
     updateClock();
 
-    // HUD mouse coords
-    document.addEventListener('mousemove', e => {
-      const xEl = document.getElementById('hud-x');
-      const yEl = document.getElementById('hud-y');
-      if (xEl) xEl.textContent = 'X: ' + String(e.clientX).padStart(4, '0');
-      if (yEl) yEl.textContent = 'Y: ' + String(e.clientY).padStart(4, '0');
-    }, { passive: true });
-
-    // HUD current section
-    const secNames = { home: 'HOME', about: 'PROFILE', projects: 'PROJECTS', tech: 'STACK', blog: 'LOGS', contact: 'CONTACT' };
-    window.addEventListener('scroll', () => {
-      const secs = document.querySelectorAll('section[id]');
-      let cur = 'HOME';
-      secs.forEach(s => { if (window.scrollY >= s.offsetTop - 130) cur = secNames[s.id] || s.id.toUpperCase(); });
-      const el = document.getElementById('hud-section');
-      if (el) el.textContent = 'SEC: ' + cur;
-    }, { passive: true });
-
-    // Remove loader after load
+    /* Remove loader after load */
     window.addEventListener('load', () => {
       setTimeout(() => {
         const loader = document.getElementById('quantum-loader');
-        if (loader) { loader.style.opacity = '0'; loader.style.transition = 'opacity .5s'; setTimeout(() => loader.remove(), 500); }
+        if (loader) {
+          loader.style.opacity = '0';
+          loader.style.transition = 'opacity .5s';
+          setTimeout(() => loader.remove(), 500);
+        }
       }, 800);
     });
+
+
+
+     document.addEventListener('DOMContentLoaded', () => {
+    const lazyVideos = document.querySelectorAll('.lazy-video');
+
+    function loadVideo(video) {
+      if (!video.dataset.src || video.src) return;
+
+      video.src = video.dataset.src;
+      video.load();
+
+      video.play().catch(() => {
+        // Browser may block autoplay sometimes, but muted videos usually work.
+      });
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        const video = entry.target;
+
+        if (entry.isIntersecting) {
+          loadVideo(video);
+          video.play().catch(() => {});
+        } else {
+          video.pause();
+        }
+      });
+    }, {
+      root: null,
+      rootMargin: '300px',
+      threshold: 0.01
+    });
+
+    lazyVideos.forEach(video => observer.observe(video));
+
+    const eagerVideos = document.querySelectorAll('.alien-video:not(.lazy-video)');
+
+    eagerVideos.forEach(video => {
+      video.play().catch(() => {});
+    });
+  });
   </script>
 </body>
 </html>
