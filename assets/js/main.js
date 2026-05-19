@@ -14,7 +14,8 @@ const state = {
   lastScrollY: 0,
   scrollDirty: false,
   ticking: false,
-  time: 0
+  time: 0,
+  isScrolling: false,   // pause flag for videos/animations during scroll
 };
 
 /* ── SINGLE MASTER RAF LOOP — kicked off at bottom of file ─────── */
@@ -264,11 +265,30 @@ const sideLinks  = document.querySelectorAll('.sidebar-link');
 const parallaxLayers = document.querySelectorAll('.parallax-layer');
 const alienWraps = document.querySelectorAll('.alien-wrap');
 
+/* scroll-pause: debounce timer to detect when scrolling stops */
+let _scrollPauseTimer = null;
+
+function setScrollPause(active) {
+  if (state.isScrolling === active) return;
+  state.isScrolling = active;
+  document.body.classList.toggle('is-scrolling', active);
+
+  // pause/resume all decorative videos
+  document.querySelectorAll('.alien-video, .ufo-video, .rocket-video').forEach(v => {
+    active ? v.pause() : v.play().catch(() => {});
+  });
+}
+
 function handleScroll() {
   const sy = window.scrollY;
   const speed = Math.abs(sy - state.lastScrollY);
   state.lastScrollY = sy;
   state.scrollY = sy;
+
+  // engage scroll-pause immediately
+  setScrollPause(true);
+  clearTimeout(_scrollPauseTimer);
+  _scrollPauseTimer = setTimeout(() => setScrollPause(false), 150);
 
   // header
   siteHeader.classList.toggle('scrolled', sy > 60);
@@ -279,10 +299,13 @@ function handleScroll() {
     layer.style.transform = `translate3d(0,${sy * depth}px,0)`;
   });
 
-  // active sidebar
+  // active sidebar + header nav (merged from section 23)
   let cur = '';
   sections.forEach(s => { if (sy >= s.offsetTop - 130) cur = s.id; });
   sideLinks.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + cur));
+  document.querySelectorAll('.header-nav a').forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === '#' + cur);
+  });
 
   // alien speed glow
   if (speed > 25) {
@@ -665,13 +688,15 @@ document.querySelectorAll('h2.section-title').forEach(h => titleObs.observe(h));
 
     function fly(ts) {
       if (!alive) return;
-      const dt = last ? ts - last : 16;
+      if (!state.isScrolling) {
+        const dt = last ? ts - last : 16;
+        cx += dir.vx * speed * dt;
+        cy += dir.vy * speed * dt;
+        const wobble = Math.sin(ts / 420) * 2.2;
+        wrap.style.left = (cx + -dir.vy * wobble) + 'px';
+        wrap.style.top  = (cy +  dir.vx * wobble) + 'px';
+      }
       last = ts;
-      cx += dir.vx * speed * dt;
-      cy += dir.vy * speed * dt;
-      const wobble = Math.sin(ts / 420) * 2.2;
-      wrap.style.left = (cx + -dir.vy * wobble) + 'px';
-      wrap.style.top  = (cy +  dir.vx * wobble) + 'px';
       requestAnimationFrame(fly);
     }
     requestAnimationFrame(fly);
@@ -721,16 +746,7 @@ const rippleStyle = document.createElement('style');
 rippleStyle.textContent = `@keyframes holo-ripple{0%{width:0;height:0;opacity:.9;border-color:var(--cyan)}100%{width:120px;height:120px;opacity:0;border-color:var(--green)}}`;
 document.head.appendChild(rippleStyle);
 
-/* ═══════════════════════════════════════════════════════════════
-   23. HEADER NAV ACTIVE HIGHLIGHT
-════════════════════════════════════════════════════════════════ */
-window.addEventListener('scroll', () => {
-  let cur = '';
-  sections.forEach(s => { if (window.scrollY >= s.offsetTop - 130) cur = s.id; });
-  document.querySelectorAll('.header-nav a').forEach(a => {
-    a.classList.toggle('active', a.getAttribute('href') === '#' + cur);
-  });
-}, { passive: true });
+/* section 23 merged into handleScroll above — no second scroll listener needed */
 
 /* ═══════════════════════════════════════════════════════════════
    24. DATA STREAM EFFECT — random numbers rain on background

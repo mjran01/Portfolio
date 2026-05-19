@@ -1045,3 +1045,41 @@ footer::before {
 .ufo-video::-webkit-media-controls-enclosure {
   display: none !important;
 }
+/* ═══════════════════════════════════════════════════════════════
+   SCROLL-PAUSE — freeze decorative animations while user scrolls.
+   Videos are paused via JS; CSS handles keyframe animations.
+   Parallax (.parallax-layer) is intentionally excluded — it's
+   driven by JS transforms, not keyframes, so it runs as-is.
+════════════════════════════════════════════════════════════════ */
+
+/* pause CSS keyframe animations on all decorative elements */
+body.is-scrolling .alien-wrap,
+body.is-scrolling .ufo-wrap,
+body.is-scrolling .rocket-wrap,
+body.is-scrolling .alien-video,
+body.is-scrolling .ufo-video,
+body.is-scrolling .rocket-video,
+body.is-scrolling .ufo-glow,
+body.is-scrolling .ufo-beam,
+body.is-scrolling .rocket-glow,
+body.is-scrolling #data-streams {
+  animation-play-state: paused !important;
+}
+
+/* star field: pause twinkle during scroll to save GPU */
+body.is-scrolling .stars-field * {
+  animation-play-state: paused !important;
+}
+
+/* ── PERF: content-visibility on heavy off-screen sections ───── */
+/* Lets the browser skip paint/layout for sections not in view   */
+section {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 600px; /* fallback size estimate     */
+}
+
+/* ── PERF: drop will-change when not needed ──────────────────── */
+/* Only keep it on elements actually animating with transforms   */
+.ufo-wrap, .rocket-wrap {
+  will-change: transform;   /* left/top driven by JS, promote once */
+}
