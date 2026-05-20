@@ -856,7 +856,7 @@ h2.section-title::after {
   border-color: rgba(0,229,255,0.45);
   box-shadow: 0 0 60px rgba(0,229,255,0.15);
 }
-.blog-img-wrap { position: relative; overflow: hidden; height: 200px; }
+.blog-img-wrap { position: relative; overflow: hidden; height: 300px; }
 .blog-img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s, filter .5s; display: block; }
 .blog-card:hover .blog-img { transform: scale(1.06); filter: brightness(1.1) saturate(1.15); }
 .blog-scan {
@@ -1102,4 +1102,106 @@ footer::before {
   .stack-tab { font-size: .7rem; padding: .38rem .75rem; }
   .stack-panel { grid-template-columns: 1fr 1fr; }
   .all-projects-grid { grid-template-columns: 1fr; }
+}
+
+
+
+/* ══════════════════════════════════════════════════════════════
+   SCROLL-PAUSE SYSTEM
+   When .is-scrolling is on <html>, all non-essential CSS
+   animations are paused. Content (images, text, layout) is
+   completely unaffected. Resumes instantly on scroll stop.
+══════════════════════════════════════════════════════════════ */
+
+/* ── PAUSE ALL DECORATIVE ANIMATIONS DURING SCROLL ── */
+html.is-scrolling .alien-wrap,
+html.is-scrolling .alien-glow,
+html.is-scrolling .ufo-wrap,
+html.is-scrolling .ufo-glow,
+html.is-scrolling .ufo-beam,
+html.is-scrolling .rocket-glow,
+html.is-scrolling .rrb1,
+html.is-scrolling .rrb2,
+html.is-scrolling .rrb3,
+html.is-scrolling .ar1,
+html.is-scrolling .ar2,
+html.is-scrolling .ar3,
+html.is-scrolling .banner-sweep,
+html.is-scrolling .banner-grad-border,
+html.is-scrolling .neon-frame,
+html.is-scrolling .scan-line,
+html.is-scrolling #chroma-overlay,
+html.is-scrolling .hp-fill,
+html.is-scrolling .ssp-fill,
+html.is-scrolling .hud-panel::before,
+html.is-scrolling section::before,
+html.is-scrolling .footer-brand,
+html.is-scrolling footer::before,
+html.is-scrolling h2.section-title,
+html.is-scrolling h2.section-title::after,
+html.is-scrolling .status-dot,
+html.is-scrolling #sidebar::before,
+html.is-scrolling header::before,
+html.is-scrolling .glitch::before,
+html.is-scrolling .glitch::after,
+html.is-scrolling .logo-cursor {
+  animation-play-state: paused !important;
+}
+
+/* ── PAUSE video elements during scroll (JS handles actual pause/resume, this is CSS safety net) ── */
+html.is-scrolling video {
+  /* visibility: hidden would cause layout shift — not used */
+  will-change: auto; /* release GPU layer during scroll to save VRAM */
+}
+
+/* ── MATRIX CANVAS — hide during scroll, instant restore ── */
+html.is-scrolling #matrix-canvas {
+  opacity: 0;
+  transition: opacity 0.1s;
+}
+#matrix-canvas {
+  transition: opacity 0.3s;
+}
+
+/* ── HOLOGRAM GRID — hide during scroll ── */
+html.is-scrolling canvas:not(#reactor-canvas):not(#particle-canvas):not(#contact-reactor) {
+  opacity: 0 !important;
+  transition: opacity 0.1s;
+}
+
+/* ── GPU OPTIMIZATION: promote key composited layers ── */
+#matrix-canvas,
+#particle-canvas,
+#reactor-canvas,
+.alien-wrap,
+.ufo-wrap,
+.rocket-wrap,
+.banner,
+#cursor,
+#cursor-dot,
+.trail-dot {
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+/* ── Reduce paint during scroll: disable expensive filters ── */
+html.is-scrolling .alien-wrap {
+  filter: none !important;
+}
+html.is-scrolling .ufo-wrap {
+  filter: none !important;
+}
+
+/* ── CONTENT NEVER PAUSES: these are always animated ── */
+/* .reveal transitions, .section-flash, scrollbar, hover states —
+   these are transition-based not animation-based, always active */
+
+/* ── PERFORMANCE: contain paint to sections ── */
+section {
+  contain: layout style;
+}
+
+/* ── Smooth scroll behavior — native, no JS overhead ── */
+html {
+  scroll-behavior: smooth;
 }

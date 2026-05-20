@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mark // Full-Stack Developer · Systems Architect</title>
+  <meta name="theme-color" content="#00050a" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&family=Exo+2:ital,wght@0,100;0,400;0,700;1,400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/css/style.css" />
   <style>
@@ -747,6 +750,38 @@
         <div class="tech-card reveal"><div class="tech-icon">🐘</div><div class="tech-name">PHP / Laravel</div><div class="tech-level"><div class="tech-level-fill" style="width:92%"></div></div></div>
         <div class="tech-card reveal"><div class="tech-icon">🟨</div><div class="tech-name">JavaScript (Node)</div><div class="tech-level"><div class="tech-level-fill" style="width:80%"></div></div></div>
         <div class="tech-card reveal"><div class="tech-icon">📮</div><div class="tech-name">REST APIs</div><div class="tech-level"><div class="tech-level-fill" style="width:90%"></div></div></div>
+        <div class="tech-card reveal">
+  <div class="tech-icon">🐹</div>
+  <div class="tech-name">Go (Golang)</div>
+  <div class="tech-level">
+    <div class="tech-level-fill" style="width:92%"></div>
+  </div>
+</div>
+
+<div class="tech-card reveal">
+  <div class="tech-icon">⚡</div>
+  <div class="tech-name">Go Fiber</div>
+  <div class="tech-level">
+    <div class="tech-level-fill" style="width:88%"></div>
+  </div>
+</div>
+
+<div class="tech-card reveal">
+  <div class="tech-icon">🚀</div>
+  <div class="tech-name">Go Gin</div>
+  <div class="tech-level">
+    <div class="tech-level-fill" style="width:93%"></div>
+  </div>
+</div>
+
+<div class="tech-card reveal">
+  <div class="tech-icon">🟩</div>
+  <div class="tech-name">Node.js / Express</div>
+  <div class="tech-level">
+    <div class="tech-level-fill" style="width:86%"></div>
+  </div>
+</div>
+     
       </div>
 
       <div class="stack-panel" id="stack-frontend">
@@ -754,6 +789,31 @@
         <div class="tech-card reveal"><div class="tech-icon">🎨</div><div class="tech-name">CSS3</div><div class="tech-level"><div class="tech-level-fill" style="width:94%"></div></div></div>
         <div class="tech-card reveal"><div class="tech-icon">🟨</div><div class="tech-name">JavaScript</div><div class="tech-level"><div class="tech-level-fill" style="width:88%"></div></div></div>
         <div class="tech-card reveal"><div class="tech-icon">📐</div><div class="tech-name">Bootstrap</div><div class="tech-level"><div class="tech-level-fill" style="width:88%"></div></div></div>
+        <div class="tech-card reveal">
+  <div class="tech-icon">⚛</div>
+  <div class="tech-name">React</div>
+  <div class="tech-level">
+    <div class="tech-level-fill" style="width:85%"></div>
+  </div>
+</div>
+
+<div class="tech-card reveal">
+  <div class="tech-icon">🔥</div>
+  <div class="tech-name">SvelteKit</div>
+  <div class="tech-level">
+    <div class="tech-level-fill" style="width:90%"></div>
+  </div>
+</div>
+
+<div class="tech-card reveal">
+  <div class="tech-icon">💚</div>
+  <div class="tech-name">Vue.js</div>
+  <div class="tech-level">
+    <div class="tech-level-fill" style="width:80%"></div>
+  </div>
+</div>
+
+
       </div>
 
       <div class="stack-panel" id="stack-database">
@@ -895,7 +955,7 @@
     </div>
   </footer>
 
-  <script src="assets/js/main.js"></script>
+  <script src="assets/js/main.js" defer></script>
 
   <script>
     /* ── HUD clock ── */
@@ -937,6 +997,7 @@
     const bars = ['▁▂▃▅▇▅▃▂','▂▄▆▇▆▄▂▁','▃▅▇▆▄▂▁▂','▅▇▆▃▂▄▆▇','▇▆▄▂▁▃▅▇'];
     let bi = 0;
     setInterval(() => {
+      if (document.documentElement.classList.contains('is-scrolling')) return;
       const el = document.getElementById('eng-output');
       if (el) el.textContent = bars[bi++ % bars.length];
       const sig = document.getElementById('signal-val');
@@ -951,6 +1012,7 @@
       const cx = 140, cy = 140, r = 90;
       let t = 0;
       function draw() {
+        if (!document.documentElement.classList.contains('is-scrolling')) {
         ctx.clearRect(0,0,280,280);
         t += 0.018;
         // rings
@@ -981,6 +1043,7 @@
         ctx.strokeStyle = `rgba(0,229,255,${0.2+0.1*Math.sin(t)})`;
         ctx.lineWidth = 1;
         ctx.stroke();
+        } // end !is-scrolling
         requestAnimationFrame(draw);
       }
       draw();

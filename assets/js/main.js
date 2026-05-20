@@ -1,30 +1,94 @@
 /* ═══════════════════════════════════════════════════════════════
-   MARK PORTFOLIO — main.js  [CINEMATIC ULTRA EDITION]
-   AI Reactor Core · Cinematic Effects · Maximum Animations
-   Perf: single rAF loop, GPU transforms, no layout-thrash
+   MARK PORTFOLIO — main.js  [PERFORMANCE OPTIMIZED EDITION]
+   Scroll-Pause System: All videos, canvas loops, heavy CSS
+   animations pause during scroll — resume on idle.
+   Visual effects identical when standing still.
 ════════════════════════════════════════════════════════════════ */
 'use strict';
 
 /* ── GLOBAL STATE ── */
 const state = {
   mouseX: 0, mouseY: 0,
-  dotX: 0, dotY: 0,
-  scrollY: 0, time: 0
+  dotX: 0,   dotY: 0,
+  scrollY: 0, time: 0,
+  isScrolling: false,
+  rafId: null
 };
 
-/* ── MASTER RAF LOOP ── */
-function masterLoop(ts) {
-  state.time = ts;
-  tickCursor(ts);
-  tickParticles();
-  tickHologram(ts);
-  tickReactor(ts);
-  requestAnimationFrame(masterLoop);
+/* ══════════════════════════════════════════════════════════════
+   SCROLL-PAUSE ENGINE
+   — Adds/removes class 'is-scrolling' on <html>
+   — Pauses/resumes all videos
+   — Pauses/resumes canvas loops
+   — CSS handles animation-play-state via .is-scrolling selector
+══════════════════════════════════════════════════════════════ */
+let scrollTimer = null;
+const ROOT = document.documentElement;
+const SCROLL_RESUME_DELAY = 150; // ms after scroll stops before resuming
+
+// Canvas loop gate — checked every rAF tick
+let canvasActive = true;
+
+function onScrollStart() {
+  if (!state.isScrolling) {
+    state.isScrolling = true;
+    canvasActive = false;
+    ROOT.classList.add('is-scrolling');
+    // Pause all videos
+    document.querySelectorAll('video').forEach(v => { try { v.pause(); } catch(e){} });
+  }
+  clearTimeout(scrollTimer);
+  scrollTimer = setTimeout(onScrollEnd, SCROLL_RESUME_DELAY);
 }
 
-/* ═══════════════════════════════════════════════════════════════
+function onScrollEnd() {
+  state.isScrolling = false;
+  canvasActive = true;
+  ROOT.classList.remove('is-scrolling');
+  // Resume all videos
+  document.querySelectorAll('video').forEach(v => { try { v.play().catch(()=>{}); } catch(e){} });
+  // Re-observe new videos that may have spawned
+  observeNewVideos();
+}
+
+window.addEventListener('scroll', () => {
+  state.scrollY = window.scrollY;
+  onScrollStart();
+  // Lightweight scroll-only tasks run here (no rAF needed)
+  updateParallax();
+  updateSidebarActive();
+  updateHeaderNav();
+  updateHudSection();
+  if (header) header.classList.toggle('scrolled', state.scrollY > 40);
+}, { passive: true });
+
+// Watch dynamically added videos (UFO/Rocket spawner)
+function observeNewVideos() {
+  document.querySelectorAll('video').forEach(v => {
+    if (!v._scrollManaged) {
+      v._scrollManaged = true;
+      // Nothing to do here — scroll handler covers all
+    }
+  });
+}
+
+/* ══════════════════════════════════════════════════════════════
+   MASTER RAF LOOP — skips canvas work during scroll
+══════════════════════════════════════════════════════════════ */
+function masterLoop(ts) {
+  state.time = ts;
+  tickCursor(ts); // cursor always runs (smooth feel)
+  if (canvasActive) {
+    tickParticles();
+    tickHologram(ts);
+    tickReactor(ts);
+  }
+  state.rafId = requestAnimationFrame(masterLoop);
+}
+
+/* ══════════════════════════════════════════════════════════════
    1. CURSOR + TRAIL
-════════════════════════════════════════════════════════════════ */
+══════════════════════════════════════════════════════════════ */
 const cursorEl  = document.getElementById('cursor');
 const dotEl     = document.getElementById('cursor-dot');
 const trailCont = document.getElementById('cursor-trail-container');
@@ -44,10 +108,11 @@ for (let i = 0; i < TRAIL_N; i++) {
 document.addEventListener('mousemove', e => {
   state.mouseX = e.clientX;
   state.mouseY = e.clientY;
-  cursorEl.style.transform = `translate(${e.clientX - 13}px, ${e.clientY - 13}px)`;
+  if (cursorEl) cursorEl.style.transform = `translate(${e.clientX - 13}px, ${e.clientY - 13}px)`;
 }, { passive: true });
 
 function tickCursor() {
+  if (!dotEl) return;
   state.dotX += (state.mouseX - state.dotX) * 0.16;
   state.dotY += (state.mouseY - state.dotY) * 0.16;
   dotEl.style.transform = `translate(${state.dotX - 3}px, ${state.dotY - 3}px)`;
@@ -60,17 +125,18 @@ function tickCursor() {
 }
 
 document.querySelectorAll('a, button, .project-card, .blog-card, .obj-card, .tech-card, .alien-wrap').forEach(el => {
-  el.addEventListener('mouseenter', () => cursorEl.classList.add('cursor-hover'),    { passive: true });
-  el.addEventListener('mouseleave', () => cursorEl.classList.remove('cursor-hover'), { passive: true });
+  el.addEventListener('mouseenter', () => cursorEl && cursorEl.classList.add('cursor-hover'),    { passive: true });
+  el.addEventListener('mouseleave', () => cursorEl && cursorEl.classList.remove('cursor-hover'), { passive: true });
 });
 
-/* ═══════════════════════════════════════════════════════════════
-   2. MATRIX RAIN
-════════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════
+   2. MATRIX RAIN — throttled, skips during scroll
+══════════════════════════════════════════════════════════════ */
 const mc   = document.getElementById('matrix-canvas');
-const mctx = mc.getContext('2d');
+const mctx = mc ? mc.getContext('2d') : null;
 let matrixW, matrixH, matrixCols, drops;
 function resizeMatrix() {
+  if (!mc) return;
   matrixW = mc.width  = window.innerWidth;
   matrixH = mc.height = window.innerHeight;
   matrixCols = Math.floor(matrixW / 16);
@@ -82,6 +148,7 @@ window.addEventListener('resize', resizeMatrix, { passive: true });
 const chars = 'アイウエオカキクケコサシスセソタチツ01010110ABCDEF<>/\\{}[]∑∆∇⟨⟩★◈⬡';
 let matrixFrame = 0;
 setInterval(() => {
+  if (state.isScrolling || !mctx) return; // skip during scroll
   matrixFrame++;
   if (matrixFrame % 2 !== 0) return;
   mctx.fillStyle = 'rgba(0,0,0,0.048)';
@@ -97,12 +164,13 @@ setInterval(() => {
   }
 }, 40);
 
-/* ═══════════════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════════════
    3. HERO PARTICLE SYSTEM
-════════════════════════════════════════════════════════════════ */
+══════════════════════════════════════════════════════════════ */
 const pc   = document.getElementById('particle-canvas');
-const pctx = pc.getContext('2d');
+const pctx = pc ? pc.getContext('2d') : null;
 function resizeParticle() {
+  if (!pc) return;
   pc.width  = pc.offsetWidth;
   pc.height = pc.offsetHeight;
 }
@@ -111,8 +179,8 @@ window.addEventListener('resize', resizeParticle, { passive: true });
 
 const PARTICLE_N = 80;
 const particles  = Array.from({ length: PARTICLE_N }, () => ({
-  x: Math.random() * (pc.width || 800),
-  y: Math.random() * (pc.height || 600),
+  x: Math.random() * (pc ? pc.width  || 800 : 800),
+  y: Math.random() * (pc ? pc.height || 600 : 600),
   r: Math.random() * 2 + 0.4,
   vx: (Math.random() - .5) * 0.4,
   vy: (Math.random() - .5) * 0.4,
@@ -123,7 +191,7 @@ const particles  = Array.from({ length: PARTICLE_N }, () => ({
 
 const LINK_DIST = 130;
 function tickParticles() {
-  if (!pc.width) return;
+  if (!pc || !pctx || !pc.width) return;
   pctx.clearRect(0, 0, pc.width, pc.height);
   const t = state.time * 0.001;
   pctx.lineWidth = 0.5;
@@ -155,9 +223,9 @@ function tickParticles() {
   });
 }
 
-/* ═══════════════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════════════
    4. HOLOGRAM GRID (fixed background)
-════════════════════════════════════════════════════════════════ */
+══════════════════════════════════════════════════════════════ */
 const holoCanvas = document.createElement('canvas');
 holoCanvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;opacity:0.04;';
 document.body.appendChild(holoCanvas);
@@ -179,10 +247,9 @@ function tickHologram(ts) {
   hctx.globalAlpha = 0.6; hctx.stroke(); hctx.globalAlpha = 1;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   5. ★★★ AI REACTOR CORE — CINEMATIC CENTERPIECE ★★★
-   Full Iron-Man / Arc Reactor inspired dynamic canvas animation
-════════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════
+   5. ★★★ AI REACTOR CORE ★★★
+══════════════════════════════════════════════════════════════ */
 const reactorCanvas = document.getElementById('reactor-canvas');
 let reactorCtx = null;
 if (reactorCanvas) { reactorCtx = reactorCanvas.getContext('2d'); }
@@ -196,7 +263,7 @@ function tickReactor(ts) {
 
   ctx.clearRect(0, 0, cv.width, cv.height);
 
-  /* ── OUTER DEEP SPACE GLOW ── */
+  /* outer glow */
   const outerGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, cv.width * 0.5);
   outerGlow.addColorStop(0, `rgba(0,229,255,${0.04 + 0.02 * Math.sin(t)})`);
   outerGlow.addColorStop(0.4, `rgba(123,47,255,${0.03 + 0.01 * Math.sin(t * 1.3)})`);
@@ -204,7 +271,7 @@ function tickReactor(ts) {
   ctx.beginPath(); ctx.arc(cx, cy, cv.width * 0.5, 0, Math.PI * 2);
   ctx.fillStyle = outerGlow; ctx.fill();
 
-  /* ── ROTATING OUTER ARCS (3 tiers) ── */
+  /* rotating outer arcs */
   const arcDefs = [
     { r: 185, speed: 0.18, gaps: 8, w: 1.5, color: [0,229,255], alpha: 0.35 },
     { r: 168, speed: -0.28, gaps: 6, w: 1,   color: [0,255,65],  alpha: 0.28 },
@@ -227,7 +294,7 @@ function tickReactor(ts) {
     ctx.restore();
   });
 
-  /* ── MIDDLE RINGS (continuous) ── */
+  /* middle rings */
   const rings = [
     { r: 138, rot: t * -0.15, alpha: 0.2,  color: [0,229,255], dashes: [8,6] },
     { r: 124, rot: t * 0.22,  alpha: 0.18, color: [0,255,65],  dashes: [5,8] },
@@ -246,25 +313,21 @@ function tickReactor(ts) {
     ctx.restore();
   });
 
-  /* ── INNER GEOMETRIC FRAME (hexagonal orbit system) ── */
-  const hexR = 92;
-  const hexRot = t * 0.08;
+  /* hex frame */
+  const hexR = 92, hexRot = t * 0.08;
   ctx.save(); ctx.translate(cx, cy); ctx.rotate(hexRot);
   ctx.beginPath();
   for (let i = 0; i < 6; i++) {
     const angle = (i * Math.PI * 2) / 6;
-    const x = hexR * Math.cos(angle);
-    const y = hexR * Math.sin(angle);
-    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    i === 0 ? ctx.moveTo(hexR * Math.cos(angle), hexR * Math.sin(angle))
+            : ctx.lineTo(hexR * Math.cos(angle), hexR * Math.sin(angle));
   }
   ctx.closePath();
   ctx.strokeStyle = `rgba(0,229,255,${0.15 + 0.06 * Math.sin(t * 2)})`;
-  ctx.lineWidth = 1.2;
-  ctx.shadowColor = '#00e5ff'; ctx.shadowBlur = 10;
-  ctx.stroke();
+  ctx.lineWidth = 1.2; ctx.shadowColor = '#00e5ff'; ctx.shadowBlur = 10; ctx.stroke();
   ctx.restore();
 
-  /* ── ENERGY SPOKES (8 radial beams) ── */
+  /* energy spokes */
   const spokeRot = t * 0.12;
   for (let i = 0; i < 8; i++) {
     const angle = spokeRot + (i * Math.PI * 2) / 8;
@@ -280,24 +343,16 @@ function tickReactor(ts) {
     ctx.beginPath();
     ctx.moveTo(cx + innerR * Math.cos(angle), cy + innerR * Math.sin(angle));
     ctx.lineTo(cx + outerR * Math.cos(angle), cy + outerR * Math.sin(angle));
-    ctx.strokeStyle = grad;
-    ctx.lineWidth = 1.5;
-    ctx.shadowColor = '#00e5ff'; ctx.shadowBlur = 6;
-    ctx.stroke();
+    ctx.strokeStyle = grad; ctx.lineWidth = 1.5;
+    ctx.shadowColor = '#00e5ff'; ctx.shadowBlur = 6; ctx.stroke();
   }
 
-  /* ── INNER BRIGHT RING ── */
-  const ringPulse = 0.7 + 0.3 * Math.sin(t * 2.5);
-  const innerRingGrad = ctx.createRadialGradient(cx, cy, 30, cx, cy, 42);
-  innerRingGrad.addColorStop(0, `rgba(0,229,255,${ringPulse})`);
-  innerRingGrad.addColorStop(1, `rgba(0,229,255,0)`);
+  /* inner bright ring */
   ctx.beginPath(); ctx.arc(cx, cy, 36, 0, Math.PI * 2);
   ctx.strokeStyle = `rgba(0,229,255,${0.6 + 0.4 * Math.sin(t * 3)})`;
-  ctx.lineWidth = 2.5;
-  ctx.shadowColor = '#00e5ff'; ctx.shadowBlur = 30;
-  ctx.stroke();
+  ctx.lineWidth = 2.5; ctx.shadowColor = '#00e5ff'; ctx.shadowBlur = 30; ctx.stroke();
 
-  /* ── PLASMA CORE BALL ── */
+  /* plasma core */
   const coreSize = 28 + 3 * Math.sin(t * 4);
   const corePulse2 = 0.5 + 0.5 * Math.sin(t * 3.5);
   const coreGrad = ctx.createRadialGradient(cx - 5, cy - 5, 0, cx, cy, coreSize);
@@ -307,35 +362,27 @@ function tickReactor(ts) {
   coreGrad.addColorStop(0.8, `rgba(0,100,200,${0.4 * corePulse2})`);
   coreGrad.addColorStop(1, 'transparent');
   ctx.beginPath(); ctx.arc(cx, cy, coreSize, 0, Math.PI * 2);
-  ctx.fillStyle = coreGrad;
-  ctx.shadowColor = '#00e5ff'; ctx.shadowBlur = 60;
-  ctx.fill();
+  ctx.fillStyle = coreGrad; ctx.shadowColor = '#00e5ff'; ctx.shadowBlur = 60; ctx.fill();
   ctx.shadowBlur = 0;
 
-  /* ── ENERGY FLARES at cardinal points ── */
+  /* energy flares */
   const flareRot = t * 0.4;
   for (let i = 0; i < 4; i++) {
     const angle = flareRot + (i * Math.PI) / 2;
     const flareLen = 55 + 20 * Math.sin(t * 2 + i * Math.PI / 2);
     const flareAlpha = 0.5 + 0.4 * Math.sin(t * 3 + i);
-    const fx = cx + 32 * Math.cos(angle);
-    const fy = cy + 32 * Math.sin(angle);
-    const ex = cx + (32 + flareLen) * Math.cos(angle);
-    const ey = cy + (32 + flareLen) * Math.sin(angle);
+    const fx = cx + 32 * Math.cos(angle), fy = cy + 32 * Math.sin(angle);
+    const ex = cx + (32 + flareLen) * Math.cos(angle), ey = cy + (32 + flareLen) * Math.sin(angle);
     const flareGrad = ctx.createLinearGradient(fx, fy, ex, ey);
     flareGrad.addColorStop(0, `rgba(0,229,255,${flareAlpha})`);
     flareGrad.addColorStop(0.6, `rgba(123,47,255,${flareAlpha * 0.5})`);
     flareGrad.addColorStop(1, 'rgba(123,47,255,0)');
-    ctx.beginPath();
-    ctx.moveTo(fx, fy); ctx.lineTo(ex, ey);
-    ctx.strokeStyle = flareGrad;
-    ctx.lineWidth = 2.5;
-    ctx.shadowColor = '#00e5ff'; ctx.shadowBlur = 15;
-    ctx.stroke();
-    ctx.shadowBlur = 0;
+    ctx.beginPath(); ctx.moveTo(fx, fy); ctx.lineTo(ex, ey);
+    ctx.strokeStyle = flareGrad; ctx.lineWidth = 2.5;
+    ctx.shadowColor = '#00e5ff'; ctx.shadowBlur = 15; ctx.stroke(); ctx.shadowBlur = 0;
   }
 
-  /* ── ORBITING PARTICLES ── */
+  /* orbiting particles */
   const orbitDefs = [
     { r: 148, n: 3, speed: 0.5,  size: 3,   color: '#00ff41' },
     { r: 120, n: 5, speed: -0.7, size: 2.5, color: '#00e5ff' },
@@ -345,40 +392,30 @@ function tickReactor(ts) {
   orbitDefs.forEach(orbit => {
     for (let i = 0; i < orbit.n; i++) {
       const angle = t * orbit.speed + (i * Math.PI * 2) / orbit.n;
-      const ox = cx + orbit.r * Math.cos(angle);
-      const oy = cy + orbit.r * Math.sin(angle);
+      const ox = cx + orbit.r * Math.cos(angle), oy = cy + orbit.r * Math.sin(angle);
       const pAlpha = 0.6 + 0.4 * Math.sin(t * 4 + i);
       ctx.beginPath(); ctx.arc(ox, oy, orbit.size, 0, Math.PI * 2);
-      ctx.fillStyle = orbit.color;
-      ctx.shadowColor = orbit.color; ctx.shadowBlur = 20;
-      ctx.fill();
+      ctx.fillStyle = orbit.color; ctx.shadowColor = orbit.color; ctx.shadowBlur = 20; ctx.fill();
       ctx.shadowBlur = 0;
-      // trail
       for (let s = 1; s <= 4; s++) {
         const ta = angle - s * 0.08 * orbit.speed;
-        const tx = cx + orbit.r * Math.cos(ta);
-        const ty = cy + orbit.r * Math.sin(ta);
+        const tx = cx + orbit.r * Math.cos(ta), ty = cy + orbit.r * Math.sin(ta);
         ctx.beginPath(); ctx.arc(tx, ty, orbit.size * (1 - s * 0.2), 0, Math.PI * 2);
-        const hex = orbit.color;
-        ctx.fillStyle = hex;
-        ctx.globalAlpha = pAlpha * (0.4 / s);
-        ctx.fill();
-        ctx.globalAlpha = 1;
+        ctx.fillStyle = orbit.color; ctx.globalAlpha = pAlpha * (0.4 / s); ctx.fill(); ctx.globalAlpha = 1;
       }
     }
   });
 
-  /* ── SCANLINE SWEEP across reactor ── */
+  /* scanline sweep across reactor */
   const scanY = cy + 160 * Math.sin(t * 0.7);
   const scanGrad = ctx.createLinearGradient(cx - 190, scanY, cx + 190, scanY);
   scanGrad.addColorStop(0, 'transparent');
   scanGrad.addColorStop(0.4, `rgba(0,229,255,${0.06 + 0.04 * Math.sin(t * 3)})`);
   scanGrad.addColorStop(0.6, `rgba(0,229,255,${0.06 + 0.04 * Math.sin(t * 3)})`);
   scanGrad.addColorStop(1, 'transparent');
-  ctx.fillStyle = scanGrad;
-  ctx.fillRect(cx - 190, scanY - 1, 380, 2);
+  ctx.fillStyle = scanGrad; ctx.fillRect(cx - 190, scanY - 1, 380, 2);
 
-  /* ── OUTER HALO ── */
+  /* outer halo */
   const haloAlpha = 0.06 + 0.03 * Math.sin(t * 1.5);
   const halo = ctx.createRadialGradient(cx, cy, 170, cx, cy, 210);
   halo.addColorStop(0, `rgba(0,229,255,${haloAlpha})`);
@@ -388,9 +425,9 @@ function tickReactor(ts) {
   ctx.fillStyle = halo; ctx.fill();
 }
 
-/* ═══════════════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════════════
    6. STARS FIELD
-════════════════════════════════════════════════════════════════ */
+══════════════════════════════════════════════════════════════ */
 (function() {
   const sf = document.getElementById('stars1');
   if (!sf) return;
@@ -398,13 +435,7 @@ function tickReactor(ts) {
     const s = document.createElement('div');
     const size = Math.random() * 2.5 + 0.5;
     const c = Math.random() > .9 ? '#b070ff' : Math.random() > .8 ? '#00e5ff' : '#fff';
-    s.style.cssText = `
-      position:absolute;border-radius:50%;
-      width:${size}px;height:${size}px;background:${c};
-      left:${Math.random()*100}%;top:${Math.random()*100}%;
-      box-shadow:0 0 ${size*3}px ${c};
-      animation:star-twinkle ${2+Math.random()*4}s ${Math.random()*4}s ease-in-out infinite;
-    `;
+    s.style.cssText = `position:absolute;border-radius:50%;width:${size}px;height:${size}px;background:${c};left:${Math.random()*100}%;top:${Math.random()*100}%;box-shadow:0 0 ${size*3}px ${c};animation:star-twinkle ${2+Math.random()*4}s ${Math.random()*4}s ease-in-out infinite;`;
     sf.appendChild(s);
   }
   const ss = document.createElement('style');
@@ -412,9 +443,9 @@ function tickReactor(ts) {
   document.head.appendChild(ss);
 })();
 
-/* ═══════════════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════════════
    7. TYPEWRITER
-════════════════════════════════════════════════════════════════ */
+══════════════════════════════════════════════════════════════ */
 const phrases = [
   '> INITIATING_WORLD.SYS',
   '> BUILDING_CIVIC_TECH...',
@@ -438,9 +469,9 @@ function typeStep() {
 }
 setTimeout(typeStep, 3200);
 
-/* ═══════════════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════════════
    8. TERMINAL ANIMATION
-════════════════════════════════════════════════════════════════ */
+══════════════════════════════════════════════════════════════ */
 const termLines = [
   { type: 'cmd', text: 'cat profile.json' },
   { type: 'out', cls: 't-key', text: 'mark_dev — Fullstack Engineer' },
@@ -478,14 +509,13 @@ const termLines = [
   setTimeout(nextLine, 3500);
 })();
 
-/* ═══════════════════════════════════════════════════════════════
-   9. SCROLL REVEAL (IntersectionObserver)
-════════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════
+   9. SCROLL REVEAL
+══════════════════════════════════════════════════════════════ */
 const revealObs = new IntersectionObserver((entries) => {
   entries.forEach(e => {
     if (e.isIntersecting) {
       e.target.classList.add('in-view');
-      // Animate tech level bars
       const fill = e.target.querySelector('.tech-level-fill');
       if (fill && fill.dataset.w) fill.style.width = fill.dataset.w;
     }
@@ -494,15 +524,14 @@ const revealObs = new IntersectionObserver((entries) => {
 
 document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
 
-/* Store tech bar widths and reset to 0 for animation */
 document.querySelectorAll('.tech-level-fill').forEach(fill => {
   fill.dataset.w = fill.style.width;
   fill.style.width = '0';
 });
 
-/* ═══════════════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════════════
    10. COUNTER ANIMATION
-════════════════════════════════════════════════════════════════ */
+══════════════════════════════════════════════════════════════ */
 const counterObs = new IntersectionObserver((entries) => {
   entries.forEach(e => {
     if (e.isIntersecting && !e.target.dataset.done) {
@@ -520,65 +549,68 @@ const counterObs = new IntersectionObserver((entries) => {
 }, { threshold: 0.5 });
 document.querySelectorAll('.stat-num').forEach(el => counterObs.observe(el));
 
-/* ═══════════════════════════════════════════════════════════════
-   11. PARALLAX
-════════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════
+   11. PARALLAX — scroll-driven only, no rAF needed
+══════════════════════════════════════════════════════════════ */
 const sections = Array.from(document.querySelectorAll('section[id]'));
-window.addEventListener('scroll', () => {
-  state.scrollY = window.scrollY;
+function updateParallax() {
   document.querySelectorAll('.parallax-layer[data-depth]').forEach(layer => {
     const depth = parseFloat(layer.dataset.depth);
-    const offset = state.scrollY * depth;
-    layer.style.transform = `translateY(${offset}px)`;
+    layer.style.transform = `translateY(${state.scrollY * depth}px)`;
   });
-}, { passive: true });
+}
 
-/* ═══════════════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════════════
    12. HEADER SCROLL EFFECT
-════════════════════════════════════════════════════════════════ */
+══════════════════════════════════════════════════════════════ */
 const header = document.getElementById('site-header');
-window.addEventListener('scroll', () => {
-  header && header.classList.toggle('scrolled', window.scrollY > 40);
-}, { passive: true });
 
-/* ═══════════════════════════════════════════════════════════════
-   13. SIDEBAR LINK ACTIVE
-════════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════
+   13. SIDEBAR + HEADER NAV ACTIVE (scroll-driven)
+══════════════════════════════════════════════════════════════ */
 const sidebarLinks = document.querySelectorAll('.sidebar-link[href^="#"]');
-window.addEventListener('scroll', () => {
+function updateSidebarActive() {
   let cur = '';
-  sections.forEach(s => { if (window.scrollY >= s.offsetTop - 130) cur = s.id; });
-  sidebarLinks.forEach(a => {
-    const active = a.getAttribute('href') === '#' + cur;
-    a.classList.toggle('active', active);
+  sections.forEach(s => { if (state.scrollY >= s.offsetTop - 130) cur = s.id; });
+  sidebarLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + cur));
+}
+function updateHeaderNav() {
+  let cur = '';
+  sections.forEach(s => { if (state.scrollY >= s.offsetTop - 130) cur = s.id; });
+  document.querySelectorAll('.header-nav a').forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === '#' + cur);
   });
-}, { passive: true });
+}
+const hudSectionNames = { home: 'HOME', about: 'PROFILE', projects: 'PROJECTS', tech: 'STACK', blog: 'LOGS', contact: 'CONTACT' };
+function updateHudSection() {
+  let cur = 'HOME';
+  sections.forEach(s => { if (state.scrollY >= s.offsetTop - 130) cur = hudSectionNames[s.id] || s.id.toUpperCase(); });
+  const el = document.getElementById('hud-section');
+  if (el) el.textContent = 'SEC: ' + cur;
+}
 
-/* ═══════════════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════════════
    14. SMOOTH SCROLL
-════════════════════════════════════════════════════════════════ */
+══════════════════════════════════════════════════════════════ */
 document.querySelectorAll('a[href^="#"]').forEach(link => {
   link.addEventListener('click', e => {
     const target = document.querySelector(link.getAttribute('href'));
     if (!target) return;
     e.preventDefault();
     target.scrollIntoView({ behavior: 'smooth' });
-    // section flash effect
     target.classList.add('section-flash');
     setTimeout(() => target.classList.remove('section-flash'), 900);
-    // shockwave
     const sw = document.createElement('div');
     sw.className = 'sec-shockwave';
     target.appendChild(sw);
     setTimeout(() => sw.remove(), 1000);
-    // close mobile sidebar
     document.getElementById('sidebar')?.classList.remove('open');
   });
 });
 
-/* ═══════════════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════════════
    15. TECH STACK TABS
-════════════════════════════════════════════════════════════════ */
+══════════════════════════════════════════════════════════════ */
 document.querySelectorAll('.stack-tab').forEach(tab => {
   tab.addEventListener('click', () => {
     document.querySelectorAll('.stack-tab').forEach(t => t.classList.remove('active'));
@@ -592,9 +624,9 @@ document.querySelectorAll('.stack-tab').forEach(tab => {
   });
 });
 
-/* ═══════════════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════════════
    16. PROJECT CAROUSEL
-════════════════════════════════════════════════════════════════ */
+══════════════════════════════════════════════════════════════ */
 const carouselWrap = document.getElementById('carousel-wrap');
 const dotsContainer = document.getElementById('carousel-dots');
 let activeCard = 0;
@@ -625,9 +657,9 @@ document.getElementById('next-btn')?.addEventListener('click', () => {
 });
 if (carouselWrap) { setTimeout(updateDots, 100); }
 
-/* ═══════════════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════════════
    17. 3D TILT on banner
-════════════════════════════════════════════════════════════════ */
+══════════════════════════════════════════════════════════════ */
 const banner = document.querySelector('.banner');
 if (banner) {
   banner.addEventListener('mousemove', e => {
@@ -641,19 +673,13 @@ if (banner) {
   });
 }
 
-/* ═══════════════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════════════
    18. HOLOGRAPHIC CLICK RIPPLE
-════════════════════════════════════════════════════════════════ */
+══════════════════════════════════════════════════════════════ */
 document.addEventListener('click', e => {
   const ripple = document.createElement('div');
-  ripple.style.cssText = `
-    position:fixed;left:${e.clientX}px;top:${e.clientY}px;
-    width:0;height:0;border-radius:50%;pointer-events:none;z-index:9999;
-    border:2px solid var(--cyan);transform:translate(-50%,-50%);
-    animation:holo-ripple .8s ease-out forwards;
-  `;
+  ripple.style.cssText = `position:fixed;left:${e.clientX}px;top:${e.clientY}px;width:0;height:0;border-radius:50%;pointer-events:none;z-index:9999;border:2px solid var(--cyan);transform:translate(-50%,-50%);animation:holo-ripple .8s ease-out forwards;`;
   document.body.appendChild(ripple);
-  // second ring
   const r2 = ripple.cloneNode();
   r2.style.animationDelay = '.12s';
   r2.style.borderColor = 'var(--green)';
@@ -664,12 +690,13 @@ const rippleStyle = document.createElement('style');
 rippleStyle.textContent = `@keyframes holo-ripple{0%{width:0;height:0;opacity:1;border-color:var(--cyan)}100%{width:160px;height:160px;opacity:0;border-color:var(--green)}}`;
 document.head.appendChild(rippleStyle);
 
-/* ═══════════════════════════════════════════════════════════════
-   19. UFO SPAWNER
-════════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════
+   19. UFO SPAWNER — scroll-aware
+══════════════════════════════════════════════════════════════ */
 (function () {
   function rand(a, b) { return Math.random() * (b - a) + a; }
   function spawnUFO() {
+    if (state.isScrolling) return; // don't spawn during scroll
     if (document.querySelectorAll('.ufo-wrap').length >= 2) return;
     const wrap = document.createElement('div');
     wrap.className = 'ufo-wrap';
@@ -681,6 +708,7 @@ document.head.appendChild(rippleStyle);
     requestAnimationFrame(() => requestAnimationFrame(() => wrap.classList.add('visible')));
     const stay = rand(8000, 18000);
     const driftTimer = setInterval(() => {
+      if (state.isScrolling) return;
       wrap.style.transition = 'left 3.5s ease-in-out, top 3.5s ease-in-out';
       wrap.style.left = rand(10, window.innerWidth - 130) + 'px';
       wrap.style.top  = rand(10, window.innerHeight - 130) + 'px';
@@ -695,9 +723,9 @@ document.head.appendChild(rippleStyle);
   setInterval(spawnUFO, rand(10000, 22000));
 })();
 
-/* ═══════════════════════════════════════════════════════════════
-   20. ROCKET SPAWNER
-════════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════
+   20. ROCKET SPAWNER — scroll-aware
+══════════════════════════════════════════════════════════════ */
 (function () {
   const DIRS = [
     { angle: 0,   vx: 0,   vy: -1 }, { angle: 45,  vx: .7,  vy: -.7 },
@@ -707,6 +735,7 @@ document.head.appendChild(rippleStyle);
   ];
   function rand(a, b) { return Math.random() * (b - a) + a; }
   function spawnRocket() {
+    if (state.isScrolling) return; // don't spawn during scroll
     if (document.querySelectorAll('.rocket-wrap').length >= 2) return;
     const dir  = DIRS[Math.floor(rand(0, DIRS.length))];
     const wrap = document.createElement('div');
@@ -722,6 +751,7 @@ document.head.appendChild(rippleStyle);
     let alive = true, last = null, cx = sx, cy = sy;
     function fly(ts) {
       if (!alive) return;
+      if (state.isScrolling) { requestAnimationFrame(fly); return; } // pause movement during scroll
       const dt = last ? ts - last : 16; last = ts;
       cx += dir.vx * speed * dt;
       cy += dir.vy * speed * dt;
@@ -741,9 +771,9 @@ document.head.appendChild(rippleStyle);
   setInterval(spawnRocket, rand(9000, 16000));
 })();
 
-/* ═══════════════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════════════
    21. TOGGLE ALL PROJECTS
-════════════════════════════════════════════════════════════════ */
+══════════════════════════════════════════════════════════════ */
 let showingAll = false;
 window.toggleAllProjects = function() {
   showingAll = !showingAll;
@@ -756,25 +786,19 @@ window.toggleAllProjects = function() {
   }
 };
 
-/* ═══════════════════════════════════════════════════════════════
-   22. HEADER NAV ACTIVE
-════════════════════════════════════════════════════════════════ */
-window.addEventListener('scroll', () => {
-  let cur = '';
-  sections.forEach(s => { if (window.scrollY >= s.offsetTop - 130) cur = s.id; });
-  document.querySelectorAll('.header-nav a').forEach(a => {
-    a.classList.toggle('active', a.getAttribute('href') === '#' + cur);
-  });
-}, { passive: true });
+/* ══════════════════════════════════════════════════════════════
+   22. HUD CLOCK + COORDS (inline script handles these, keep lightweight)
+══════════════════════════════════════════════════════════════ */
 
-/* ═══════════════════════════════════════════════════════════════
-   23. DATA STREAM EFFECT
-════════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════
+   23. DATA STREAM EFFECT — skip during scroll
+══════════════════════════════════════════════════════════════ */
 (function() {
   const sc = document.createElement('div');
   sc.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;overflow:hidden;';
   document.body.appendChild(sc);
   function spawnStream() {
+    if (state.isScrolling) return;
     const s = document.createElement('div');
     const x = Math.random() * 100;
     const dur = 5 + Math.random() * 7;
@@ -791,15 +815,15 @@ window.addEventListener('scroll', () => {
   setInterval(spawnStream, 1600);
 })();
 
-/* ═══════════════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════════════
    24. SIDEBAR TOGGLE
-════════════════════════════════════════════════════════════════ */
+══════════════════════════════════════════════════════════════ */
 const sidebarToggle = document.getElementById('sidebar-toggle');
 if (sidebarToggle) {
   sidebarToggle.onclick = () => document.getElementById('sidebar').classList.toggle('open');
 }
 
-/* ═══════════════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════════════
    25. KICK OFF MASTER LOOP
-════════════════════════════════════════════════════════════════ */
+══════════════════════════════════════════════════════════════ */
 requestAnimationFrame(masterLoop);
