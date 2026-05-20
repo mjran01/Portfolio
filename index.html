@@ -3,226 +3,228 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mark // Full-Stack Developer</title>
-
-  <!--
-    ══════════════════════════════════════════════════════════════
-    PERF FIX #1 — FONT LOADING
-    ── WHY: Google Fonts was loaded twice (once in <head> and
-       once via @import in style.css). Each is a separate
-       render-blocking request. We consolidate to one <link>
-       here, add display=swap so text is visible while fonts load
-       (eliminates invisible-text flicker / layout shift), and
-       add rel=preconnect to the Google Fonts origins so the
-       TCP/TLS handshake is already done when the font request
-       fires. This alone can save 300-600ms on cold load.
-    ══════════════════════════════════════════════════════════════
-  -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&family=Exo+2:ital,wght@0,100;0,400;0,700;1,400&display=swap"
-  />
-
-  <!--
-    PERF FIX #2 — ELIMINATE RENDER-BLOCKING CSS IMPORT
-    The style.css file had @import url('https://fonts.googleapis.com/...')
-    at the top, which is the worst possible way to load fonts — the
-    browser must fetch, parse the CSS file, THEN discover the @import,
-    THEN fetch fonts. Removed from style.css entirely; handled above.
-  -->
+  <title>Mark // Full-Stack Developer · Systems Architect</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&family=Exo+2:ital,wght@0,100;0,400;0,700;1,400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/css/style.css" />
-
   <style>
-    /* ══════════════════════════════════════════════════════════
-       PERF FIX #3 — CRITICAL CSS INLINED
-       These rules affect above-the-fold layout/paint so they
-       must be in <head>. Anything that was previously in the
-       external stylesheet but needed for first paint lives here.
-    ══════════════════════════════════════════════════════════ */
+    /* ══════════════════════════════════════════════════════════════
+       AI REACTOR CORE — CINEMATIC CENTER-PIECE
+    ══════════════════════════════════════════════════════════════ */
+    #reactor-core-wrap {
+      position: absolute;
+      right: -30px; top: 50%;
+      transform: translateY(-55%);
+      width: 420px; height: 420px;
+      pointer-events: none; z-index: 1;
+      flex-shrink: 0;
+    }
+    #reactor-canvas {
+      width: 100%; height: 100%;
+      filter: drop-shadow(0 0 40px rgba(0,229,255,0.7)) drop-shadow(0 0 120px rgba(0,229,255,0.3)) drop-shadow(0 0 200px rgba(123,47,255,0.2));
+      animation: reactor-pulse-wrapper 4s ease-in-out infinite;
+    }
+    @keyframes reactor-pulse-wrapper {
+      0%,100% { filter: drop-shadow(0 0 40px rgba(0,229,255,0.7)) drop-shadow(0 0 120px rgba(0,229,255,0.3)) drop-shadow(0 0 200px rgba(123,47,255,0.2)); }
+      50%      { filter: drop-shadow(0 0 80px rgba(0,229,255,1)) drop-shadow(0 0 200px rgba(0,229,255,0.5)) drop-shadow(0 0 300px rgba(123,47,255,0.4)) drop-shadow(0 0 400px rgba(0,255,65,0.2)); }
+    }
 
-    /* Quantum energy bars on section tops
-       PERF FIX #4 — USE opacity ANIMATION, NOT background repaint
-       Original triggered full background repaint every frame.
-       opacity change is composited-only (no paint). ✓ */
+    /* ── HUD STATUS PANELS ─── */
+    .hud-panel {
+      position: absolute; padding: .55rem .9rem;
+      background: rgba(0,8,18,0.92);
+      border: 1px solid rgba(0,229,255,0.2);
+      font-family: 'Share Tech Mono', monospace; font-size: .58rem;
+      color: var(--cyan); letter-spacing: .1em; line-height: 1.9;
+      backdrop-filter: blur(10px);
+    }
+    .hud-panel::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+      animation: hud-line 3s ease-in-out infinite;
+    }
+    @keyframes hud-line { 0%,100%{opacity:.3} 50%{opacity:1} }
+    .hud-panel .hp-label { color: var(--muted); font-size: .52rem; letter-spacing: .2em; }
+    .hud-panel .hp-val   { color: var(--green); }
+    .hud-panel .hp-bar   { width: 100%; height: 3px; background: rgba(0,229,255,0.12); margin-top: 2px; }
+    .hud-panel .hp-fill  { height: 100%; background: linear-gradient(90deg, var(--green), var(--cyan)); box-shadow: 0 0 8px var(--cyan); animation: hud-fill 2s ease-in-out infinite alternate; }
+    @keyframes hud-fill   { from { opacity: .7; } to { opacity: 1; box-shadow: 0 0 20px var(--cyan); } }
+
+    /* ── SECTION TOP ENERGY LINES ── */
     section::before {
       content: '';
-      position: absolute; top: 0; left: 0; right: 0; height: 1px;
-      background: linear-gradient(90deg, transparent 0%, rgba(0,229,255,0.4) 30%, rgba(0,255,65,0.4) 60%, transparent 100%);
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent 0%, rgba(0,229,255,0.6) 30%, rgba(0,255,65,0.6) 60%, transparent 100%);
       z-index: 2; pointer-events: none;
-      opacity: 0;
-      animation: section-top-line 6s ease-in-out infinite;
-      animation-delay: calc(var(--sec-delay, 0) * 1s);
-      will-change: opacity; /* composited — no layout/paint */
+      animation: section-top-line 5s ease-in-out infinite;
+      animation-delay: calc(var(--sec-delay,0) * 1s);
     }
     @keyframes section-top-line {
-      0%,100% { opacity: 0; }
-      50%      { opacity: 1; }
+      0%,100% { opacity: 0; transform: scaleX(0.7); }
+      50%      { opacity: 1; transform: scaleX(1); }
     }
 
-    /* HUD elements */
+    /* ── CORNER BRACKETS ── */
+    section > .sec-corner { position: absolute; width: 22px; height: 22px; border-color: rgba(0,229,255,0.35); border-style: solid; pointer-events: none; z-index: 3; transition: all .5s; }
+    .sec-corner.tl { top: 14px; left: 14px; border-width: 2px 0 0 2px; }
+    .sec-corner.tr { top: 14px; right: 14px; border-width: 2px 2px 0 0; }
+    .sec-corner.bl { bottom: 14px; left: 14px; border-width: 0 0 2px 2px; }
+    .sec-corner.br { bottom: 14px; right: 14px; border-width: 0 2px 2px 0; }
+    section:hover > .sec-corner { border-color: rgba(0,229,255,0.7); width: 32px; height: 32px; }
+
+    /* ── HUD COORDS ── */
     #hud-coords {
       position: fixed; bottom: 1.2rem; right: 1.2rem; z-index: 95;
       font-family: 'Share Tech Mono', monospace; font-size: .6rem;
-      color: rgba(0,229,255,0.4); letter-spacing: .1em;
+      color: rgba(0,229,255,0.5); letter-spacing: .1em;
       pointer-events: none; text-align: right; line-height: 1.8;
-      /* PERF FIX #5 — contain HUD so updates don't trigger ancestor reflow */
-      contain: strict;
     }
     #hud-coords span { display: block; }
-
     #hud-time {
       position: fixed; bottom: 1.2rem; left: calc(var(--sidebar-w) + 1.2rem); z-index: 95;
       font-family: 'Share Tech Mono', monospace; font-size: .6rem;
-      color: rgba(0,255,65,0.35); letter-spacing: .1em;
+      color: rgba(0,255,65,0.45); letter-spacing: .1em;
       pointer-events: none; line-height: 1.8;
-      contain: strict;
     }
 
-    #data-streams { opacity: 0.55; }
+    /* ── QUANTUM LOADER ── */
+    #quantum-loader {
+      position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 9999;
+      background: linear-gradient(90deg, var(--green), var(--cyan), var(--plasma), var(--accent), var(--green));
+      background-size: 300%;
+      animation: quantum-load 2s linear forwards, quantum-shift 1s linear infinite;
+      transform-origin: left;
+      box-shadow: 0 0 20px var(--cyan), 0 0 40px rgba(0,229,255,0.5);
+    }
+    @keyframes quantum-load { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+    @keyframes quantum-shift { 0% { background-position: 0%; } 100% { background-position: 300%; } }
 
-    /* Corner brackets */
-    section > .sec-corner { position: absolute; width: 16px; height: 16px; border-color: rgba(0,229,255,0.25); border-style: solid; pointer-events: none; z-index: 3; }
-    .sec-corner.tl { top: 12px; left: 12px; border-width: 1px 0 0 1px; }
-    .sec-corner.tr { top: 12px; right: 12px; border-width: 1px 1px 0 0; }
-    .sec-corner.bl { bottom: 12px; left: 12px; border-width: 0 0 1px 1px; }
-    .sec-corner.br { bottom: 12px; right: 12px; border-width: 0 1px 1px 0; }
+    /* ── NOISE OVERLAY ── */
+    #noise-overlay {
+      position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: .03;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      background-size: 256px 256px;
+      mix-blend-mode: overlay;
+    }
 
-    /* Plasma energy meter */
+    /* ── PLASMA BORDER on stat boxes ── */
+    .stat-box { position: relative; }
     .stat-box::before {
       content: '';
       position: absolute; top: 0; left: 0; right: 0; height: 2px;
       background: linear-gradient(90deg, var(--plasma), var(--cyan), var(--green));
       transform: scaleX(0); transform-origin: left;
       transition: transform .5s cubic-bezier(.4,0,.2,1);
-      /* scaleX is composited — no paint ✓ */
     }
     .stat-box:hover::before { transform: scaleX(1); }
 
-    /* HEX ID labels */
+    /* ── PROJECT HEX IDs ── */
     .project-card::after {
       content: attr(data-hex);
       position: absolute; top: .5rem; right: .7rem;
       font-family: 'Share Tech Mono', monospace; font-size: .52rem;
-      color: rgba(0,229,255,0.3); letter-spacing: .08em;
+      color: rgba(0,229,255,0.35); letter-spacing: .08em;
       z-index: 3; pointer-events: none;
-      transition: color .3s; /* color-only transition, cheap ✓ */
+      transition: color .3s;
     }
-    .project-card:hover::after { color: rgba(0,229,255,0.7); }
+    .project-card:hover::after { color: rgba(0,229,255,0.85); }
 
-    /* Sidebar active link pulse ring */
-    .sidebar-link.active .icon { position: relative; }
-    .sidebar-link.active .icon::before {
+    /* ── TECH CARD SHIMMER ── */
+    .tech-card::before {
       content: '';
-      position: absolute; inset: -4px; border-radius: 50%;
-      border: 1px solid var(--cyan);
-      animation: icon-ring .6s ease-out;
-      will-change: opacity, transform; /* composited ✓ */
+      position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0,229,255,0.08), transparent);
+      transition: left .5s; pointer-events: none;
     }
-    @keyframes icon-ring {
-      0%   { opacity: 1; transform: scale(0.5); }
-      100% { opacity: 0; transform: scale(2); }
+    .tech-card:hover::before { left: 140%; }
+
+    /* ── ANIMATED GRADIENT BORDER on banner ── */
+    .banner-grad-border {
+      position: absolute; inset: 0; border-radius: 6px; pointer-events: none; z-index: 0;
+      background: linear-gradient(var(--bg), var(--bg)) padding-box,
+                  linear-gradient(90deg, rgba(0,229,255,0.5), rgba(0,255,65,0.4), rgba(123,47,255,0.3), rgba(0,229,255,0.5)) border-box;
+      border: 1px solid transparent;
+      animation: border-glow-cycle 5s linear infinite;
+    }
+    @keyframes border-glow-cycle {
+      0%   { filter: hue-rotate(0deg); }
+      100% { filter: hue-rotate(360deg); }
     }
 
-    /* Quantum loader bar */
-    #quantum-loader {
-      position: fixed; top: 0; left: 0; right: 0; height: 2px; z-index: 9999;
-      background: linear-gradient(90deg, var(--green), var(--cyan), var(--plasma), var(--accent), var(--green));
-      background-size: 300%;
-      animation: quantum-load 2s linear forwards, quantum-shift 1s linear infinite;
-      transform-origin: left;
-      will-change: transform; /* scaleX on transform — composited ✓ */
-    }
-    @keyframes quantum-load { from { transform: scaleX(0); } to { transform: scaleX(1); } }
-    @keyframes quantum-shift { 0% { background-position: 0%; } 100% { background-position: 300%; } }
-
-    /*
-      PERF FIX #6 — NOISE OVERLAY: SVG DATA-URI → CSS NOISE
-      Original: browser fetched, decoded, and painted a full-screen
-      SVG filter every frame. This is extremely expensive.
-      Fix: Use a static CSS background-image SVG (no filter element),
-      which gets rasterized once by the browser and cached as a texture.
-      Same visual result, zero per-frame cost.
-    */
-    #noise-overlay {
-      position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: .025;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
-      background-size: 200px 200px;
-      mix-blend-mode: overlay;
-      /* PERF: isolate this layer so mix-blend-mode doesn't flatten everything below */
-      isolation: isolate;
-    }
-
-    /* "See more" btn */
+    /* ── GHOST BUTTON ── */
     .btn-ghost {
       font-family: 'Rajdhani', sans-serif; font-weight: 700;
       letter-spacing: .15em; text-transform: uppercase; font-size: .75rem;
       padding: .5rem 1.4rem; border-radius: 3px; cursor: pointer;
       background: transparent; border: 1px solid rgba(0,229,255,0.3);
-      color: rgba(0,229,255,0.7); transition: border-color .22s, color .22s, box-shadow .22s;
-      /* Only transition composited/cheap properties ✓ */
+      color: rgba(0,229,255,0.7); transition: all .22s;
     }
     .btn-ghost:hover {
       border-color: var(--cyan); color: var(--cyan);
-      box-shadow: 0 0 20px rgba(0,229,255,0.25);
+      box-shadow: 0 0 30px rgba(0,229,255,0.3), inset 0 0 20px rgba(0,229,255,0.05);
     }
 
-    /*
-      PERF FIX #7 — TECH CARD SHIMMER: margin-left → transform
-      Original used `left: -100%` → `left: 140%` which triggers layout.
-      Fix: Use translateX which is GPU-composited, zero layout cost.
-    */
-    .tech-card::before {
-      content: '';
-      position: absolute; top: 0; left: 0; width: 60%; height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(0,229,255,0.05), transparent);
-      transform: translateX(-200%);
-      transition: transform .5s;
-      pointer-events: none;
-      will-change: transform;
+    /* ── NEON FRAME PULSE ── */
+    .neon-frame {
+      position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+      box-shadow: inset 0 0 0 1px rgba(0,229,255,0.18);
+      animation: neon-frame-pulse 3s ease-in-out infinite;
     }
-    .tech-card:hover::before { transform: translateX(400%); }
+    @keyframes neon-frame-pulse {
+      0%,100% { box-shadow: inset 0 0 0 1px rgba(0,229,255,0.18), 0 0 20px rgba(0,229,255,0.05); }
+      50%      { box-shadow: inset 0 0 0 1px rgba(0,229,255,0.45), 0 0 60px rgba(0,229,255,0.15), inset 0 0 40px rgba(0,229,255,0.04); }
+    }
 
-    /*
-      PERF FIX #8 — ANIMATED GRADIENT BORDER
-      Original keyframes swapped entire `background` shorthand values
-      (both padding-box AND border-box gradients), causing full repaint
-      every frame of a complex multi-layer background.
-      Fix: Animate only `filter: hue-rotate()` on a pseudo-element
-      with a conic-gradient. This runs on the compositor.
-    */
-    .banner-grad-border {
-      position: absolute; inset: 0; border-radius: 6px; pointer-events: none; z-index: 0;
-      background: linear-gradient(var(--bg), var(--bg)) padding-box,
-                  conic-gradient(from 0deg, rgba(0,229,255,0.35), rgba(0,255,65,0.35), rgba(123,47,255,0.25), rgba(0,229,255,0.35)) border-box;
-      border: 1px solid transparent;
-      animation: border-rotate 5s linear infinite;
-      will-change: filter;
+    /* ── CHROMATIC SHOCKWAVE on section enter ── */
+    .sec-shockwave {
+      position: absolute; top: 50%; left: 50%;
+      width: 4px; height: 4px; border-radius: 50%;
+      transform: translate(-50%,-50%);
+      border: 2px solid var(--cyan);
+      animation: shockwave 1s ease-out forwards; pointer-events: none; z-index: 50;
     }
-    @keyframes border-rotate {
-      0%   { filter: hue-rotate(0deg); }
-      100% { filter: hue-rotate(360deg); }
+    @keyframes shockwave {
+      0%   { width: 4px; height: 4px; opacity: 1; border-color: var(--cyan); }
+      100% { width: 600px; height: 600px; opacity: 0; border-color: var(--green); }
+    }
+
+    /* ── LIVE ENERGY SCAN LINE ── */
+    .scan-line {
+      position: absolute; left: 0; right: 0; height: 2px; pointer-events: none; z-index: 4;
+      background: linear-gradient(90deg, transparent, var(--cyan), var(--green), transparent);
+      opacity: 0.5; box-shadow: 0 0 12px var(--cyan), 0 0 30px rgba(0,229,255,0.3);
+      animation: scan-sweep 8s linear infinite;
+    }
+    @keyframes scan-sweep { 0% { top: -2px; opacity: 0.7; } 100% { top: 100%; opacity: 0; } }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      #reactor-core-wrap { display: none; }
+    }
+    @media (max-width: 600px) {
+      .objectives-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
 
-  <!-- QUANTUM LOADER -->
-  <div id="quantum-loader"></div>
+  <!-- BOOT OVERLAY -->
+  <div id="boot-overlay">
+    <div class="boot-inner">
+      <div class="boot-logo">MARK JEZREEL<span>MARTINEZ</span></div>
+      <div class="boot-bar-wrap"><div class="boot-bar"></div></div>
+      <div class="boot-txt" id="boot-txt">INITIALIZING QUANTUM CORE...</div>
+    </div>
+  </div>
 
-  <!-- NOISE OVERLAY -->
+  <div id="quantum-loader"></div>
   <div id="noise-overlay"></div>
 
-  <!-- CURSOR -->
+  <!-- CURSORS -->
   <div id="cursor"></div>
   <div id="cursor-dot"></div>
   <div id="cursor-trail-container"></div>
 
-  <!-- HUD ELEMENTS
-       PERF FIX #9: contain:strict isolates HUD repaints/reflows
-       from the rest of the document. Changing textContent inside
-       a contained element does NOT trigger ancestor relayout. -->
+  <!-- HUD OVERLAYS -->
   <div id="hud-coords">
     <span id="hud-x">X: 0000</span>
     <span id="hud-y">Y: 0000</span>
@@ -231,55 +233,33 @@
   <div id="hud-time">
     <span id="hud-clock">00:00:00</span>
     <span>SYS:ONLINE</span>
-    <span style="color:rgba(0,255,65,0.3)">PHL_TIMEZONE</span>
+    <span style="color:rgba(0,255,65,0.4)">PHL_TIMEZONE</span>
   </div>
 
-  <!-- MATRIX RAIN -->
+  <!-- MATRIX CANVAS -->
   <canvas id="matrix-canvas"></canvas>
 
-  <!--
-    PERF FIX #10 — ALIEN VIDEO: 4 simultaneous autoplay videos → 2 + lazy
-    Each autoplay video decodes ~1 WebM stream continuously on a separate
-    thread and forces GPU texture uploads. 4 instances is ~4× the cost.
-    Fix: Keep only 2 visible (one left, one right). The other 2 are loaded
-    lazily via IntersectionObserver when actually scrolled into view.
-    Also add `preload="none"` — without it, browsers pre-buffer even
-    off-screen video, wasting memory and bandwidth.
-    The `disablepictureinpicture` + `controlslist` attrs are preserved.
-  -->
+  <!-- CHROMATIC ABERRATION OVERLAY -->
+  <div id="chroma-overlay"></div>
 
-  <!-- ALIEN WRAPS — RIGHT (only 1 eager, 1 lazy) -->
+  <!-- ALIEN WRAPS — RIGHT -->
   <div class="alien-wrap right r1">
-    <video class="alien-video" src="assets/video/alien.webm"
-          autoplay loop muted playsinline preload="metadata"
-          disablepictureinpicture controlslist="nodownload nofullscreen noremoteplayback"></video>
+    <video class="alien-video" src="assets/video/alien.webm" autoplay loop muted playsinline></video>
     <div class="alien-glow"></div>
   </div>
-
   <div class="alien-wrap right r2">
-    <video class="alien-video lazy-video" data-src="assets/video/alien.webm"
-          loop muted playsinline preload="none"
-          disablepictureinpicture controlslist="nodownload nofullscreen noremoteplayback"></video>
+    <video class="alien-video" src="assets/video/alien.webm" autoplay loop muted playsinline></video>
     <div class="alien-glow"></div>
   </div>
-
+  <!-- ALIEN WRAPS — LEFT -->
   <div class="alien-wrap left l1">
-    <video class="alien-video lazy-video" data-src="assets/video/alien.webm"
-          loop muted playsinline preload="none"
-          disablepictureinpicture controlslist="nodownload nofullscreen noremoteplayback"></video>
-    <div class="alien-glow"></div>
-  </div>
-
-  <div class="alien-wrap left l2">
-    <video class="alien-video lazy-video" data-src="assets/video/alien.webm"
-          loop muted playsinline preload="none"
-          disablepictureinpicture controlslist="nodownload nofullscreen noremoteplayback"></video>
+    <video class="alien-video" src="assets/video/alien.webm" autoplay loop muted playsinline></video>
     <div class="alien-glow"></div>
   </div>
 
   <!-- HEADER -->
   <header id="site-header">
-    <div class="header-logo"><span>Mark Jezreel</span> Martinez</div>
+    <div class="header-logo"><span>Mark Jezreel</span> Martinez <em class="logo-cursor">_</em></div>
     <nav class="header-nav">
       <a href="#home">Home</a>
       <a href="#about">About</a>
@@ -294,7 +274,6 @@
     </div>
   </header>
 
-  <!-- SIDEBAR TOGGLE -->
   <button id="sidebar-toggle">☰</button>
 
   <!-- SIDEBAR -->
@@ -310,25 +289,33 @@
     <a href="assets/images/MarkJezreelMartinez(2025).pdf" target="_blank" class="sidebar-link">
       <span class="icon">▶</span> Resume.pdf
     </a>
+
+    <!-- SIDEBAR SYSTEM STATUS -->
+    <div class="sidebar-status-panel">
+      <div class="ssp-label">CORE STATUS</div>
+      <div class="ssp-row"><span>CPU</span><div class="ssp-bar"><div class="ssp-fill" style="width:88%"></div></div><span>88%</span></div>
+      <div class="ssp-row"><span>MEM</span><div class="ssp-bar"><div class="ssp-fill" style="width:64%"></div></div><span>64%</span></div>
+      <div class="ssp-row"><span>RCT</span><div class="ssp-bar"><div class="ssp-fill ssp-cyan" style="width:100%"></div></div><span>100%</span></div>
+    </div>
+
     <div class="sidebar-footer">
       <div style="color:var(--cyan);font-family:'Orbitron',monospace;font-size:.65rem;letter-spacing:.1em;">Mark Jezreel Martinez</div>
       <div style="color:var(--green);margin-top:.3rem;font-size:.6rem;">Fullstack Developer</div>
       <div style="margin-top:.4rem;font-size:.6rem;">Valenzuela City, PH 🇵🇭</div>
-      <div style="margin-top:.6rem;font-size:.55rem;color:rgba(0,229,255,0.3);letter-spacing:.12em;">BUILD_2090.STABLE</div>
+      <div style="margin-top:.6rem;font-size:.55rem;color:rgba(0,229,255,0.35);letter-spacing:.12em;">BUILD_2090.QUANTUM.STABLE</div>
     </div>
   </nav>
 
   <!-- MAIN -->
   <main id="main">
 
-    <!-- ══════════════════════════════════════
-         HERO
-    ═══════════════════════════════════════ -->
+    <!-- ═══════════════ HERO ═══════════════ -->
     <section id="home" style="--sec-delay:0">
       <div class="sec-corner tl"></div>
       <div class="sec-corner tr"></div>
       <div class="sec-corner bl"></div>
       <div class="sec-corner br"></div>
+      <div class="scan-line"></div>
 
       <canvas id="particle-canvas"></canvas>
 
@@ -339,6 +326,13 @@
         <div class="stars-field" id="stars1"></div>
       </div>
 
+      <!-- REACTOR ENERGY RINGS BACKGROUND -->
+      <div class="reactor-rings-bg" aria-hidden="true">
+        <div class="rrb rrb1"></div>
+        <div class="rrb rrb2"></div>
+        <div class="rrb rrb3"></div>
+      </div>
+
       <div class="banner reveal" data-parallax-card>
         <div class="banner-grad-border"></div>
         <div class="banner-corner tl"></div>
@@ -346,19 +340,23 @@
         <div class="banner-corner bl"></div>
         <div class="banner-corner br"></div>
         <div class="banner-sweep"></div>
+        <div class="neon-frame"></div>
 
-        <!--
-          PERF FIX #12 — IMAGE: Add width/height to prevent layout shift (CLS).
-          Add loading="eager" for above-the-fold profile picture.
-          Add decoding="async" so image decode doesn't block main thread.
-        -->
-        <img src="assets/images/profile_picture.webp" alt="Mark"
-             class="banner-avatar"
-             width="160" height="200"
-             loading="eager" decoding="async" />
+        <!-- PROFILE IMAGE with reactor glow frame -->
+        <div class="avatar-frame">
+          <div class="avatar-ring ar1"></div>
+          <div class="avatar-ring ar2"></div>
+          <div class="avatar-ring ar3"></div>
+          <img src="assets/images/profile_picture.jpg" alt="Mark" class="banner-avatar" />
+          <div class="avatar-scan"></div>
+          <!-- HUD DATA TAGS -->
+          <div class="avatar-tag at-tl">ID: MJM-9001</div>
+          <div class="avatar-tag at-br">CLR: LEVEL-9</div>
+        </div>
 
         <div class="banner-info">
           <div class="banner-badge">⚡ Available for Projects</div>
+          <div class="banner-hello">HELLO, I'M</div>
           <div class="banner-name glitch" data-text="MARK">MARK</div>
           <div class="banner-role">Full-Stack Developer · Systems Architect</div>
           <div id="typewriter"></div>
@@ -367,59 +365,64 @@
             <a href="#contact"  class="btn btn-outline">Initiate Contact</a>
           </div>
         </div>
+
+        <!-- AI REACTOR CORE — placed inside banner, right side -->
+        <div id="reactor-core-wrap">
+          <canvas id="reactor-canvas" width="420" height="420"></canvas>
+          <!-- HUD PANELS flanking the reactor -->
+          <div class="hud-panel" style="position:absolute;top:8%;right:-160px;width:140px;">
+            <div class="hp-label">CORE STATUS</div>
+            <div class="hp-val">100%</div>
+            <div class="hp-bar"><div class="hp-fill" style="width:100%"></div></div>
+            <div style="margin-top:.5rem" class="hp-label">ENGINEER_OUTPUT</div>
+            <div class="hp-val" id="eng-output">▂▃▅▇▅▃▂</div>
+          </div>
+          <div class="hud-panel" style="position:absolute;bottom:12%;right:-160px;width:140px;">
+            <div class="hp-label">SYS ONLINE</div>
+            <div class="hp-val" style="color:var(--green)">● ACTIVE</div>
+            <div class="hp-bar"><div class="hp-fill" style="width:100%"></div></div>
+            <div style="margin-top:.5rem" class="hp-label">SIGNAL</div>
+            <div class="hp-val" id="signal-val">███ 9.8GHz</div>
+          </div>
+        </div>
       </div>
 
       <!-- OBJECTIVES -->
-      <div>
+      <div style="position:relative;z-index:2;">
         <div class="section-tag">Core Objectives</div>
         <h2 class="section-title">Objectives</h2>
-
         <div class="objectives-grid">
-
           <div class="obj-card reveal" style="animation-delay:.1s">
-            <div class="obj-icon">⚙️</div>
-            <div class="obj-title">Build Scalable Digital Systems</div>
-            <div class="obj-desc">
-              Develop high-performance platforms capable of handling large datasets, heavy traffic, and real-world operational demands without sacrificing speed or reliability.
-            </div>
+            <div class="obj-icon-wrap"><div class="obj-icon-bg"></div>⚙️</div>
+            <div class="obj-title">Build Enterprise-Ready Systems</div>
+            <div class="obj-desc">Develop scalable, high-performance platforms built for growing businesses, complex operations, and real-world demands.</div>
           </div>
-
           <div class="obj-card reveal" style="animation-delay:.2s">
-            <div class="obj-icon">🖥️</div>
-            <div class="obj-title">Create Seamless User Experiences</div>
-            <div class="obj-desc">
-              Design modern, intuitive, and responsive interfaces that make complex workflows simple, efficient, and accessible across devices and user types.
-            </div>
+            <div class="obj-icon-wrap"><div class="obj-icon-bg"></div>🖥️</div>
+            <div class="obj-title">Create Exceptional UX</div>
+            <div class="obj-desc">Design modern, intuitive interfaces that improve usability, strengthen engagement, and deliver seamless digital experiences.</div>
           </div>
-
           <div class="obj-card reveal" style="animation-delay:.3s">
-            <div class="obj-icon">🔒</div>
-            <div class="obj-title">Develop Reliable & Maintainable Software</div>
-            <div class="obj-desc">
-              Build secure, clean, and maintainable systems with long-term stability in mind — ensuring applications remain dependable as they scale and evolve.
-            </div>
+            <div class="obj-icon-wrap"><div class="obj-icon-bg"></div>🔒</div>
+            <div class="obj-title">Deliver Secure & Reliable Code</div>
+            <div class="obj-desc">Build software with security, maintainability, and long-term stability at its core — dependable for organizations and users.</div>
           </div>
-
           <div class="obj-card reveal" style="animation-delay:.4s">
-            <div class="obj-icon">🚀</div>
-            <div class="obj-title">Turn Ideas Into Production-Ready Products</div>
-            <div class="obj-desc">
-              Transform concepts into fully functional digital solutions for businesses, organizations, and government institutions through practical engineering and efficient execution.
-            </div>
+            <div class="obj-icon-wrap"><div class="obj-icon-bg"></div>🚀</div>
+            <div class="obj-title">Drive Digital Innovation</div>
+            <div class="obj-desc">Transform ideas into impactful digital products helping businesses, institutions, and governments stay competitive.</div>
           </div>
-
         </div>
       </div>
     </section>
 
-    <!-- ══════════════════════════════════════
-         ABOUT
-    ═══════════════════════════════════════ -->
+    <!-- ═══════════════ ABOUT ═══════════════ -->
     <section id="about" style="--sec-delay:1">
       <div class="sec-corner tl"></div>
       <div class="sec-corner tr"></div>
       <div class="sec-corner bl"></div>
       <div class="sec-corner br"></div>
+      <div class="scan-line" style="animation-delay:2s"></div>
 
       <div class="parallax-layer" data-depth="0.15" style="position:absolute;inset:0;pointer-events:none;z-index:0;">
         <div class="circuit-bg"></div>
@@ -430,46 +433,26 @@
 
       <div class="about-layout">
         <div class="about-bio reveal from-left">
-          <p>
-            I'm a <span class="green">full-stack developer</span> based in
-            <span class="green">Valenzuela City, Philippines</span>, building scalable web applications,
-            APIs, and digital platforms that solve real-world problems. I work across the entire stack —
-            designing databases, developing backend systems, and crafting interfaces with a focus on
-            clarity, performance, and systems built to <span class="green">handle high-volume usage reliably</span>.
-          </p>
-
-          <p>
-            Part of my work involves developing solutions for local government operations, including
-            driver registration portals, attendance monitoring systems, and internal project management
-            platforms used to track city projects, budgets, contractors, timelines, and completion status.
-            These projects strengthened my experience in building production-grade systems capable of
-            managing large datasets, concurrent users, and demanding operational workflows without
-            compromising speed or stability.
-          </p>
-
-          <p>
-            Beyond government projects, I also take on freelance work ranging from
-            <span class="green">WordPress websites</span> to custom booking systems and business platforms.
-            I enjoy building software that is practical, maintainable, and designed for long-term growth —
-            with clean, well-structured code that both clients and future developers can work with easily.
-          </p>
+          <p>I'm a <span class="green">full-stack developer</span> building digital infrastructure for local government in <span class="green">Valenzuela City, Philippines</span>. I work across the entire stack — designing databases, writing APIs, crafting interfaces — with a bias toward clarity and systems that <span class="green">actually work</span>.</p>
+          <p>My current focus is on <span class="green">civic tech</span>: modernizing how LGU offices manage data, register citizens, and deliver services. I've shipped driver registration portals, market price monitoring systems, and custom admin dashboards — all production-grade.</p>
+          <p>Beyond government work, I take on freelance projects ranging from <span class="green">WordPress builds</span> to custom booking systems. I write clean, well-commented code because future-me is always reading it.</p>
 
           <div class="about-stats">
             <div class="stat-box reveal">
-              <span class="stat-num" data-target="10">0</span>
+              <span class="stat-num" data-target="10">0</span>+
               <span class="stat-label">Projects Shipped</span>
             </div>
             <div class="stat-box reveal">
-              <span class="stat-num" data-target="6">0</span>
-              <span class="stat-label">Gov Offices & International Clients Served</span>
+              <span class="stat-num" data-target="6">0</span>+
+              <span class="stat-label">Gov & Enterprise Clients</span>
             </div>
             <div class="stat-box reveal">
-              <span class="stat-num" data-target="5">0</span>
-              <span class="stat-label">Tech Stacks Mastered</span>
+              <span class="stat-num" data-target="5">0</span>+
+              <span class="stat-label">Years Coding Experience</span>
             </div>
             <div class="stat-box reveal">
-              <span class="stat-num" data-target="100">0</span>
-              <span class="stat-label">% Passion Driven</span>
+              <span class="stat-num" data-target="100">0</span>%
+              <span class="stat-label">Mission Focused</span>
             </div>
           </div>
         </div>
@@ -486,9 +469,7 @@
       </div>
     </section>
 
-    <!-- ══════════════════════════════════════
-         PROJECTS
-    ═══════════════════════════════════════ -->
+    <!-- ═══════════════ PROJECTS ═══════════════ -->
     <section id="projects" style="--sec-delay:2;min-height:auto;padding-bottom:5rem;">
       <div class="sec-corner tl"></div>
       <div class="sec-corner tr"></div>
@@ -506,240 +487,159 @@
         <div class="carousel-dots" id="carousel-dots"></div>
       </div>
 
-      <div class="carousel-wrap">
-        <div class="carousel-track" id="carousel-track">
-
-          <div class="project-card" data-hex="#A3F2">
-            <a href="https://shangpropertiesleasing.com" target="_blank" rel="noopener noreferrer">
-              <!--
-                PERF FIX #13 — PROJECT IMAGES: lazy loading + explicit dimensions.
-                loading="lazy" defers off-screen image downloads until user scrolls near.
-                width/height prevent CLS (layout shift while image loads).
-                decoding="async" offloads decode from main thread.
-              -->
-              <img src="assets/images/101.webp" alt="Shang Properties Leasing"
-                   class="project-thumb" loading="lazy" decoding="async" width="400" height="165" />
-            </a>
-            <div class="project-body">
-              <span class="project-tag">Real Estate · Leasing</span>
-              <div class="project-title">Shang Properties Leasing</div>
-              <div class="project-desc">A modern informational website for Shang Properties Leasing, showcasing premium leasing spaces and property information for potential clients.</div>
-              <div class="project-stack">
-                <span class="stack-pill">HTML</span><span class="stack-pill">CSS</span>
-                <span class="stack-pill">JavaScript</span><span class="stack-pill">Custom WordPress</span>
+      <div class="carousel-wrap" id="carousel-wrap">
+        <div class="project-card reveal" data-hex="0xA3F1">
+          <div class="neon-frame"></div>
+          <div class="project-img-wrap">
+            <img src="assets/images/project1.jpg" alt="Shang Properties" class="project-img" />
+            <div class="project-scan"></div>
+            <div class="project-overlay">
+              <div class="project-overlay-tags">
+                <span class="proj-tag">Real Estate</span>
+                <span class="proj-tag">Leasing</span>
               </div>
             </div>
           </div>
+          <div class="project-body">
+            <div class="project-title">Shang Properties Leasing</div>
+            <div class="project-desc">A modern real estate platform for Shang Properties Leasing. Showcases premium leasing spaces and property information with clean, animated UI.</div>
+            <div class="project-tech">
+              <span class="tech-badge">HTML</span>
+              <span class="tech-badge">CSS</span>
+              <span class="tech-badge">JavaScript</span>
+              <span class="tech-badge">Custom Animations</span>
+            </div>
+          </div>
+        </div>
 
-          <div class="project-card" data-hex="#7D1E">
-            <a href="https://tmo.valenzuela.gov.ph" target="_blank" rel="noopener noreferrer">
-              <img src="assets/images/103.webp" alt="PTDID Portal"
-                   class="project-thumb" loading="lazy" decoding="async" width="400" height="165" />
-            </a>
-            <div class="project-body">
-              <span class="project-tag">Gov · LGU</span>
-              <div class="project-title">PTDID Portal</div>
-              <div class="project-desc">Public Transportation Drivers Information Database for Valenzuela City TMO. Multi-step driver registration, QR codes, admin dashboard, and CSV export.</div>
-              <div class="project-stack">
-                <span class="stack-pill">SvelteKit</span><span class="stack-pill">Go/Gin</span>
-                <span class="stack-pill">MySQL</span><span class="stack-pill">GORM</span>
+        <div class="project-card reveal" data-hex="0xB72E" style="animation-delay:.1s">
+          <div class="neon-frame"></div>
+          <div class="project-img-wrap">
+            <img src="assets/images/project2.jpg" alt="PTOD Portal" class="project-img" />
+            <div class="project-scan"></div>
+            <div class="project-overlay">
+              <div class="project-overlay-tags">
+                <span class="proj-tag">Gov</span>
+                <span class="proj-tag">Portal</span>
               </div>
             </div>
           </div>
+          <div class="project-body">
+            <div class="project-title">PTOD Portal</div>
+            <div class="project-desc">Public Transaction Officer's Desk — Information System for Valenzuela City. Enables citizen registrations, ID tracking, and digital services.</div>
+            <div class="project-tech">
+              <span class="tech-badge">Laravel</span>
+              <span class="tech-badge">MySQL</span>
+              <span class="tech-badge">Bootstrap</span>
+              <span class="tech-badge">PHP</span>
+            </div>
+          </div>
+        </div>
 
-          <div class="project-card" data-hex="#C9B3">
-            <a href="https://vibetribenotions.com" target="_blank" rel="noopener noreferrer">
-              <img src="assets/images/104.webp" alt="Vibe Tribe Notions"
-                   class="project-thumb" loading="lazy" decoding="async" width="400" height="165" />
-            </a>
-            <div class="project-body">
-              <span class="project-tag">Freelance · Wellness</span>
-              <div class="project-title">Vibe Tribe Notions</div>
-              <div class="project-desc">Full custom WordPress site for a spiritual wellness practitioner. Custom booking system, dynamic product shop with cart, email checkout, and AJAX admin.</div>
-              <div class="project-stack">
-                <span class="stack-pill">Custom WordPress</span><span class="stack-pill">PHP</span>
-                <span class="stack-pill">AJAX</span><span class="stack-pill">MySQL</span>
+        <div class="project-card reveal" data-hex="0xC91D" style="animation-delay:.2s">
+          <div class="neon-frame"></div>
+          <div class="project-img-wrap">
+            <img src="assets/images/project3.jpg" alt="Vibe Tribe Notions" class="project-img" />
+            <div class="project-scan"></div>
+            <div class="project-overlay">
+              <div class="project-overlay-tags">
+                <span class="proj-tag">Productivity</span>
+                <span class="proj-tag">Management</span>
               </div>
             </div>
           </div>
-
-          <div class="project-card" data-hex="#F2A1">
-            <a href="https://www.philbritish.com/" target="_blank" rel="noopener noreferrer">
-              <img src="assets/images/102.webp" alt="PhilBritish Insurance"
-                   class="project-thumb" loading="lazy" decoding="async" width="400" height="165" />
-            </a>
-            <div class="project-body">
-              <span class="project-tag">Insurance · Corporate</span>
-              <div class="project-title">PhilBritish Insurance</div>
-              <div class="project-desc">Professional corporate website for PhilBritish Insurance, showcasing non-life insurance services, claims information, and business-focused design.</div>
-              <div class="project-stack">
-                <span class="stack-pill">WordPress</span><span class="stack-pill">PHP</span>
-                <span class="stack-pill">Responsive Design</span><span class="stack-pill">UI/UX</span>
-              </div>
+          <div class="project-body">
+            <div class="project-title">Vibe Tribe Notions</div>
+            <div class="project-desc">A Personal Productivity and Organization Workspace on the new Notion. Centralized hub for tasks, goals, notes, and team collaboration.</div>
+            <div class="project-tech">
+              <span class="tech-badge">Notion</span>
+              <span class="tech-badge">Automation</span>
+              <span class="tech-badge">Dashboards</span>
             </div>
           </div>
-
-          <div class="project-card" data-hex="#E3D5">
-            <a href="https://jinxi.blitzworx2.com/" target="_blank" rel="noopener noreferrer">
-              <img src="assets/images/105.webp" alt="JPDC Beta Version"
-                   class="project-thumb" loading="lazy" decoding="async" width="400" height="165" />
-            </a>
-            <div class="project-body">
-              <span class="project-tag">Corporate · Brand Website</span>
-              <div class="project-title">JPDC (Beta Version)</div>
-              <div class="project-desc">A modern WordPress website for JPDC featuring clean layouts, responsive design, brand-focused presentation, and professional digital presence.</div>
-              <div class="project-stack">
-                <span class="stack-pill">WordPress</span><span class="stack-pill">PHP</span>
-                <span class="stack-pill">Responsive Design</span><span class="stack-pill">UI/UX</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="project-card" data-hex="#B8F0">
-            <a href="https://cvskinshop.com" target="_blank" rel="noopener noreferrer">
-              <img src="assets/images/106.webp" alt="CV Skin Shop"
-                   class="project-thumb" loading="lazy" decoding="async" width="400" height="165" />
-            </a>
-            <div class="project-body">
-              <span class="project-tag">Beauty · E-Commerce</span>
-              <div class="project-title">CV Skin Shop</div>
-              <div class="project-desc">A beauty and skincare e-commerce site for CV Skin Shop, featuring product showcases, online shopping, and a clean customer-focused experience.</div>
-              <div class="project-stack">
-                <span class="stack-pill">WordPress</span><span class="stack-pill">WooCommerce</span>
-                <span class="stack-pill">PHP</span><span class="stack-pill">Responsive Design</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="project-card" data-hex="#4A9C">
-            <a href="https://www.lynkxs.com/" target="_blank" rel="noopener noreferrer">
-              <img src="assets/images/107.webp" alt="LynkXS"
-                   class="project-thumb" loading="lazy" decoding="async" width="400" height="165" />
-            </a>
-            <div class="project-body">
-              <span class="project-tag">B2B · Global Marketplace</span>
-              <div class="project-title">LynkXS</div>
-              <div class="project-desc">A hybrid Laravel and WordPress platform for LynkXS — a modern B2B marketplace for global trade and sourcing services.</div>
-              <div class="project-stack">
-                <span class="stack-pill">Laravel</span><span class="stack-pill">WordPress</span>
-                <span class="stack-pill">PHP</span><span class="stack-pill">MySQL</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="project-card" data-hex="#2E7F">
-            <a href="https://play.google.com/store/apps/details?id=com.myoptimind.ecoikot" target="_blank" rel="noopener noreferrer">
-              <img src="assets/images/108.webp" alt="Eco-Ikot App"
-                   class="project-thumb" loading="lazy" decoding="async" width="400" height="165" />
-            </a>
-            <div class="project-body">
-              <span class="project-tag">Mobile App · Sustainability</span>
-              <div class="project-title">Eco-Ikot App</div>
-              <div class="project-desc">Backend development for the Eco-Ikot mobile app using Laravel — API development, database management, authentication, and scalable backend services.</div>
-              <div class="project-stack">
-                <span class="stack-pill">Laravel</span><span class="stack-pill">REST API</span>
-                <span class="stack-pill">PHP</span><span class="stack-pill">MySQL</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="project-card" data-hex="#2E7F">
-            <a href="https://boxituppkg.com/" target="_blank" rel="noopener noreferrer">
-              <img src="assets/images/109.webp" alt="BoxitUp Packaging Website"
-                   class="project-thumb" loading="lazy" decoding="async" width="400" height="165" />
-            </a>
-            <div class="project-body">
-              <span class="project-tag">Freelance · International Client</span>
-              <div class="project-title">BoxitUp Packaging</div>
-              <div class="project-desc">
-                Migrated the company's website from Magento 1 to the latest version of WordPress,
-                ensuring a smoother content management workflow, improved compatibility, and a more
-                maintainable modern web platform without redesigning the existing brand experience.
-              </div>
-              <div class="project-stack">
-                <span class="stack-pill">WordPress</span>
-                <span class="stack-pill">Magento 1 Migration</span>
-                <span class="stack-pill">PHP</span>
-                <span class="stack-pill">MySQL</span>
-              </div>
-            </div>
-          </div>
-
         </div>
       </div>
 
+      <div style="text-align:center;margin-top:2.5rem;">
+        <button class="btn-ghost" id="see-more-btn" onclick="toggleAllProjects()">[ LOAD_MORE_PROJECTS ]</button>
+      </div>
+      <div id="all-projects-grid" class="all-projects-grid"></div>
     </section>
 
-    <!-- ══════════════════════════════════════
-         TECH STACK
-    ═══════════════════════════════════════ -->
-    <section id="tech" style="--sec-delay:3;min-height:auto;padding-bottom:5rem;">
+    <!-- ═══════════════ TECH STACK ═══════════════ -->
+    <section id="tech" style="--sec-delay:3">
       <div class="sec-corner tl"></div>
       <div class="sec-corner tr"></div>
-      <div class="hex-bg"></div>
+      <div class="sec-corner bl"></div>
+      <div class="sec-corner br"></div>
+      <div class="scan-line" style="animation-delay:4s"></div>
 
-      <div class="section-tag">Operational Loadout</div>
+      <div class="parallax-layer" data-depth="0.1" style="position:absolute;inset:0;pointer-events:none;z-index:0;">
+        <div class="hex-bg"></div>
+      </div>
+
+      <div class="section-tag">Weapons Arsenal</div>
       <h2 class="section-title">Technology Stack</h2>
 
       <div class="stack-tabs">
-        <button class="stack-tab active" onclick="showStack('backend',  this)">⚙ Backend</button>
-        <button class="stack-tab"        onclick="showStack('frontend', this)">🖥 Frontend</button>
-        <button class="stack-tab"        onclick="showStack('database', this)">🗄 Database</button>
-        <button class="stack-tab"        onclick="showStack('tools',    this)">🔧 Tools</button>
+        <button class="stack-tab active" data-tab="all">⬡ All</button>
+        <button class="stack-tab" data-tab="backend">⚙ Backend</button>
+        <button class="stack-tab" data-tab="frontend">◻ Frontend</button>
+        <button class="stack-tab" data-tab="database">🗄 Database</button>
+        <button class="stack-tab" data-tab="tools">🔧 Tools</button>
       </div>
 
-      <div class="stack-panel active" id="stack-backend">
-        <div class="tech-card reveal"><div class="tech-icon">🐹</div><div class="tech-name">Go / Gin</div><div class="tech-level"><div class="tech-level-fill" style="width:88%"></div></div></div>
-        <div class="tech-card reveal"><div class="tech-icon">🐘</div><div class="tech-name">PHP / Laravel</div><div class="tech-level"><div class="tech-level-fill" style="width:80%"></div></div></div>
-        <div class="tech-card reveal"><div class="tech-icon">🟩</div><div class="tech-name">Node.js / Express</div><div class="tech-level"><div class="tech-level-fill" style="width:78%"></div></div></div>
-        <div class="tech-card reveal"><div class="tech-icon">🔌</div><div class="tech-name">REST APIs</div><div class="tech-level"><div class="tech-level-fill" style="width:92%"></div></div></div>
-        <div class="tech-card reveal"><div class="tech-icon">🔗</div><div class="tech-name">GORM</div><div class="tech-level"><div class="tech-level-fill" style="width:75%"></div></div></div>
-        <div class="tech-card reveal"><div class="tech-icon">🏗</div><div class="tech-name">WordPress CMS</div><div class="tech-level"><div class="tech-level-fill" style="width:82%"></div></div></div>
+      <div class="stack-panel active" id="stack-all">
+        <div class="tech-card reveal"><div class="tech-icon">🐘</div><div class="tech-name">PHP / Laravel</div><div class="tech-level"><div class="tech-level-fill" style="width:92%"></div></div></div>
+        <div class="tech-card reveal"><div class="tech-icon">🟨</div><div class="tech-name">JavaScript</div><div class="tech-level"><div class="tech-level-fill" style="width:88%"></div></div></div>
+        <div class="tech-card reveal"><div class="tech-icon">🌐</div><div class="tech-name">HTML5</div><div class="tech-level"><div class="tech-level-fill" style="width:96%"></div></div></div>
+        <div class="tech-card reveal"><div class="tech-icon">🎨</div><div class="tech-name">CSS3</div><div class="tech-level"><div class="tech-level-fill" style="width:94%"></div></div></div>
+        <div class="tech-card reveal"><div class="tech-icon">🐬</div><div class="tech-name">MySQL</div><div class="tech-level"><div class="tech-level-fill" style="width:90%"></div></div></div>
+        <div class="tech-card reveal"><div class="tech-icon">🐙</div><div class="tech-name">Git / GitHub</div><div class="tech-level"><div class="tech-level-fill" style="width:88%"></div></div></div>
+        <div class="tech-card reveal"><div class="tech-icon">📝</div><div class="tech-name">VS Code</div><div class="tech-level"><div class="tech-level-fill" style="width:95%"></div></div></div>
+        <div class="tech-card reveal"><div class="tech-icon">🌀</div><div class="tech-name">WordPress CMS</div><div class="tech-level"><div class="tech-level-fill" style="width:85%"></div></div></div>
+      </div>
+
+      <div class="stack-panel" id="stack-backend">
+        <div class="tech-card reveal"><div class="tech-icon">🐘</div><div class="tech-name">PHP / Laravel</div><div class="tech-level"><div class="tech-level-fill" style="width:92%"></div></div></div>
+        <div class="tech-card reveal"><div class="tech-icon">🟨</div><div class="tech-name">JavaScript (Node)</div><div class="tech-level"><div class="tech-level-fill" style="width:80%"></div></div></div>
+        <div class="tech-card reveal"><div class="tech-icon">📮</div><div class="tech-name">REST APIs</div><div class="tech-level"><div class="tech-level-fill" style="width:90%"></div></div></div>
       </div>
 
       <div class="stack-panel" id="stack-frontend">
-        <div class="tech-card reveal"><div class="tech-icon">⚡</div><div class="tech-name">SvelteKit</div><div class="tech-level"><div class="tech-level-fill" style="width:90%"></div></div></div>
-        <div class="tech-card reveal"><div class="tech-icon">⚛</div><div class="tech-name">React & Vue JS</div><div class="tech-level"><div class="tech-level-fill" style="width:85%"></div></div></div>
-        <div class="tech-card reveal"><div class="tech-icon">🎨</div><div class="tech-name">HTML / CSS</div><div class="tech-level"><div class="tech-level-fill" style="width:95%"></div></div></div>
+        <div class="tech-card reveal"><div class="tech-icon">🌐</div><div class="tech-name">HTML5</div><div class="tech-level"><div class="tech-level-fill" style="width:96%"></div></div></div>
+        <div class="tech-card reveal"><div class="tech-icon">🎨</div><div class="tech-name">CSS3</div><div class="tech-level"><div class="tech-level-fill" style="width:94%"></div></div></div>
         <div class="tech-card reveal"><div class="tech-icon">🟨</div><div class="tech-name">JavaScript</div><div class="tech-level"><div class="tech-level-fill" style="width:88%"></div></div></div>
-        <div class="tech-card reveal"><div class="tech-icon">📱</div><div class="tech-name">Responsive Design</div><div class="tech-level"><div class="tech-level-fill" style="width:91%"></div></div></div>
-        <div class="tech-card reveal"><div class="tech-icon">🖨</div><div class="tech-name">Print/PDF APIs</div><div class="tech-level"><div class="tech-level-fill" style="width:72%"></div></div></div>
+        <div class="tech-card reveal"><div class="tech-icon">📐</div><div class="tech-name">Bootstrap</div><div class="tech-level"><div class="tech-level-fill" style="width:88%"></div></div></div>
       </div>
 
       <div class="stack-panel" id="stack-database">
         <div class="tech-card reveal"><div class="tech-icon">🐬</div><div class="tech-name">MySQL</div><div class="tech-level"><div class="tech-level-fill" style="width:90%"></div></div></div>
-        <div class="tech-card reveal"><div class="tech-icon">🐬</div><div class="tech-name">PostgreSQL</div><div class="tech-level"><div class="tech-level-fill" style="width:90%"></div></div></div>
         <div class="tech-card reveal"><div class="tech-icon">📊</div><div class="tech-name">SQL Design</div><div class="tech-level"><div class="tech-level-fill" style="width:85%"></div></div></div>
         <div class="tech-card reveal"><div class="tech-icon">🔍</div><div class="tech-name">Query Optimization</div><div class="tech-level"><div class="tech-level-fill" style="width:78%"></div></div></div>
       </div>
 
       <div class="stack-panel" id="stack-tools">
         <div class="tech-card reveal"><div class="tech-icon">🐙</div><div class="tech-name">Git / GitHub</div><div class="tech-level"><div class="tech-level-fill" style="width:88%"></div></div></div>
+        <div class="tech-card reveal"><div class="tech-icon">🐧</div><div class="tech-name">Linux / Bash</div><div class="tech-level"><div class="tech-level-fill" style="width:75%"></div></div></div>
         <div class="tech-card reveal"><div class="tech-icon">🐳</div><div class="tech-name">Docker</div><div class="tech-level"><div class="tech-level-fill" style="width:65%"></div></div></div>
         <div class="tech-card reveal"><div class="tech-icon">📮</div><div class="tech-name">Postman / REST</div><div class="tech-level"><div class="tech-level-fill" style="width:90%"></div></div></div>
       </div>
     </section>
 
-    <!-- ══════════════════════════════════════
-         BLOG
-    ═══════════════════════════════════════ -->
+    <!-- ═══════════════ BLOG ═══════════════ -->
     <section id="blog" style="--sec-delay:4;min-height:auto;padding-bottom:5rem;">
       <div class="sec-corner tl"></div>
       <div class="sec-corner tr"></div>
       <div class="hex-bg"></div>
-      <div class="parallax-layer" data-depth="0.12" style="position:absolute;inset:0;pointer-events:none;z-index:0;">
-        <div class="grid-bg"></div>
-      </div>
 
       <div class="section-tag">Field Logs // On Duty</div>
       <h2 class="section-title">Blog</h2>
 
       <div class="blog-grid">
-
         <div class="blog-card reveal">
           <div class="blog-img-wrap">
-            <img src="assets/images/blog1.webp" alt="PTDID Integration Day"
-                 class="blog-img" loading="lazy" decoding="async" width="600" height="210" />
+            <img src="assets/images/blog1.jpg" alt="PTDID Integration Day" class="blog-img" />
             <div class="blog-scan"></div>
             <div class="blog-meta">
               <span class="blog-date">2026-05-05</span>
@@ -748,14 +648,13 @@
           </div>
           <div class="blog-body">
             <div class="blog-title">Go-Live Day: PTDID Portal at Valenzuela TMO</div>
-            <div class="blog-desc">Walking into the One Stop Shop in One Mall by Traffic Management Office with the system finally running on their machines — watching officers register drivers for the first time in real-time. This is why I build what I build.</div>
+            <div class="blog-desc">Walking into the One Stop Shop in One Mall by Traffic Management Office with the system finally running on their machines — watching officers register drivers for the first time in real-time.</div>
           </div>
         </div>
 
         <div class="blog-card reveal" style="animation-delay:.2s">
           <div class="blog-img-wrap">
-            <img src="assets/images/blog2.webp" alt="Training Session"
-                 class="blog-img" loading="lazy" decoding="async" width="600" height="210" />
+            <img src="assets/images/blog2.jpg" alt="Training Session" class="blog-img" />
             <div class="blog-scan"></div>
             <div class="blog-meta">
               <span class="blog-date">2026-04-27</span>
@@ -764,16 +663,13 @@
           </div>
           <div class="blog-body">
             <div class="blog-title">Training Government Staff on the New System</div>
-            <div class="blog-desc">Running a hands-on walkthrough with TMO employees — showing them how to register drivers, generate QR codes, and export records. A UI is only as good as the people who can use it confidently.</div>
+            <div class="blog-desc">Running a hands-on walkthrough with TMO employees — showing them how to register drivers, generate QR codes, and export records.</div>
           </div>
         </div>
-
       </div>
     </section>
 
-    <!-- ══════════════════════════════════════
-         CONTACT
-    ═══════════════════════════════════════ -->
+    <!-- ═══════════════ CONTACT ═══════════════ -->
     <section id="contact" style="--sec-delay:5">
       <div class="sec-corner tl"></div>
       <div class="sec-corner tr"></div>
@@ -806,6 +702,13 @@
                 <div class="contact-item-val">markwafuu.ran@gmail.com</div>
               </div>
             </a>
+            <a href="https://linkedin.com/in/markjezreelmartinez" target="_blank" class="contact-item">
+              <span class="contact-item-icon">💼</span>
+              <div>
+                <div class="contact-item-label">LinkedIn</div>
+                <div class="contact-item-val">linkedin.com/in/markjezreelmartinez</div>
+              </div>
+            </a>
             <div class="contact-item">
               <span class="contact-item-icon">📍</span>
               <div>
@@ -820,6 +723,16 @@
                 <div class="contact-item-val">+639-489-733-145</div>
               </div>
             </div>
+          </div>
+        </div>
+
+        <!-- CONTACT REACTOR ORB -->
+        <div class="contact-reactor-wrap reveal from-right">
+          <canvas id="contact-reactor" width="280" height="280"></canvas>
+          <div class="contact-reactor-label">TRANSMISSION ARRAY</div>
+          <div class="contact-reactor-status">
+            <span class="status-dot" style="width:6px;height:6px"></span>
+            CHANNEL OPEN — AWAITING SIGNAL
           </div>
         </div>
       </div>
@@ -839,144 +752,96 @@
     </div>
   </footer>
 
-  <!--
-    PERF FIX #14 — DEFER MAIN SCRIPT
-    Adding defer ensures the script doesn't block HTML parsing.
-    It still executes after the DOM is ready, so no functional change.
-    Without defer, the browser stops parsing HTML, fetches the script,
-    executes it, then resumes — adding 100-400ms to first render.
-  -->
-  <script src="assets/js/main.js" defer></script>
+  <script src="assets/js/main.js"></script>
 
-  <!-- INLINE EXTRAS: HUD clock + mouse coords + loader removal -->
   <script>
-    /*
-      PERF FIX #15 — HUD MOUSE COORDS: use rAF throttling
-      Original: every mousemove event directly wrote to DOM.
-      At 120Hz mice that's 120 DOM writes/sec, each potentially
-      triggering a style recalc on the HUD element.
-      Fix: capture coords in a variable, write to DOM only on rAF.
-      This caps DOM writes to display refresh rate (60-120fps)
-      and batches them with other visual work.
-    */
-    (function() {
-      let hudX = 0, hudY = 0, hudRafPending = false;
-      const xEl = document.getElementById('hud-x');
-      const yEl = document.getElementById('hud-y');
-
-      document.addEventListener('mousemove', e => {
-        hudX = e.clientX;
-        hudY = e.clientY;
-        if (!hudRafPending) {
-          hudRafPending = true;
-          requestAnimationFrame(() => {
-            if (xEl) xEl.textContent = 'X: ' + String(hudX).padStart(4, '0');
-            if (yEl) yEl.textContent = 'Y: ' + String(hudY).padStart(4, '0');
-            hudRafPending = false;
-          });
-        }
-      }, { passive: true });
-    })();
-
-    /*
-      PERF FIX #16 — HUD SECTION: cache last value, skip DOM write if unchanged.
-      The scroll handler fires on every pixel of scroll. Reading offsetTop of
-      every section on each event was causing forced reflows (layout thrash).
-      Fix: Pre-cache section offsets at load + resize, update only when
-      the active section actually changes (no redundant DOM writes).
-    */
-    (function() {
-      const secNames = { home:'HOME', about:'PROFILE', projects:'PROJECTS', tech:'STACK', blog:'LOGS', contact:'CONTACT' };
-      let sectionOffsets = [];
-      let lastSec = '';
-
-      function cacheSectionOffsets() {
-        sectionOffsets = Array.from(document.querySelectorAll('section[id]')).map(s => ({
-          id: s.id,
-          top: s.offsetTop
-        }));
-      }
-      cacheSectionOffsets();
-      window.addEventListener('resize', cacheSectionOffsets, { passive: true });
-
-      window.addEventListener('scroll', () => {
-        const sy = window.scrollY;
-        let cur = 'HOME';
-        for (const s of sectionOffsets) {
-          if (sy >= s.top - 130) cur = secNames[s.id] || s.id.toUpperCase();
-        }
-        if (cur !== lastSec) {
-          lastSec = cur;
-          const el = document.getElementById('hud-section');
-          if (el) el.textContent = 'SEC: ' + cur;
-        }
-      }, { passive: true });
-    })();
-
-    /* HUD clock — 1s interval is fine, no optimization needed */
+    /* ── HUD clock ── */
     function updateClock() {
       const now = new Date();
-      const t = [now.getHours(), now.getMinutes(), now.getSeconds()]
-        .map(n => String(n).padStart(2, '0')).join(':');
+      const t = [now.getHours(), now.getMinutes(), now.getSeconds()].map(n => String(n).padStart(2, '0')).join(':');
       const el = document.getElementById('hud-clock');
       if (el) el.textContent = t;
     }
-    setInterval(updateClock, 1000);
-    updateClock();
+    setInterval(updateClock, 1000); updateClock();
 
-    /* Remove loader after load */
+    /* ── HUD mouse coords ── */
+    document.addEventListener('mousemove', e => {
+      const xEl = document.getElementById('hud-x');
+      const yEl = document.getElementById('hud-y');
+      if (xEl) xEl.textContent = 'X: ' + String(e.clientX).padStart(4, '0');
+      if (yEl) yEl.textContent = 'Y: ' + String(e.clientY).padStart(4, '0');
+    }, { passive: true });
+
+    /* ── HUD section ── */
+    const secNames = { home: 'HOME', about: 'PROFILE', projects: 'PROJECTS', tech: 'STACK', blog: 'LOGS', contact: 'CONTACT' };
+    window.addEventListener('scroll', () => {
+      const secs = document.querySelectorAll('section[id]');
+      let cur = 'HOME';
+      secs.forEach(s => { if (window.scrollY >= s.offsetTop - 130) cur = secNames[s.id] || s.id.toUpperCase(); });
+      const el = document.getElementById('hud-section');
+      if (el) el.textContent = 'SEC: ' + cur;
+    }, { passive: true });
+
+    /* ── Remove loader ── */
     window.addEventListener('load', () => {
       setTimeout(() => {
         const loader = document.getElementById('quantum-loader');
-        if (loader) {
-          loader.style.opacity = '0';
-          loader.style.transition = 'opacity .5s';
-          setTimeout(() => loader.remove(), 500);
+        if (loader) { loader.style.opacity = '0'; loader.style.transition = 'opacity .5s'; setTimeout(() => loader.remove(), 500); }
+      }, 1200);
+    });
+
+    /* ── Engineer output and signal HUD animate ── */
+    const bars = ['▁▂▃▅▇▅▃▂','▂▄▆▇▆▄▂▁','▃▅▇▆▄▂▁▂','▅▇▆▃▂▄▆▇','▇▆▄▂▁▃▅▇'];
+    let bi = 0;
+    setInterval(() => {
+      const el = document.getElementById('eng-output');
+      if (el) el.textContent = bars[bi++ % bars.length];
+      const sig = document.getElementById('signal-val');
+      if (sig) sig.textContent = '███ ' + (9.4 + Math.random() * 0.8).toFixed(1) + 'GHz';
+    }, 400);
+
+    /* ── CONTACT REACTOR small orb ── */
+    (function() {
+      const cv = document.getElementById('contact-reactor');
+      if (!cv) return;
+      const ctx = cv.getContext('2d');
+      const cx = 140, cy = 140, r = 90;
+      let t = 0;
+      function draw() {
+        ctx.clearRect(0,0,280,280);
+        t += 0.018;
+        // rings
+        for (let i = 4; i >= 1; i--) {
+          const a = (t * i * 0.5) % (Math.PI * 2);
+          ctx.save();
+          ctx.translate(cx,cy);
+          ctx.rotate(a);
+          ctx.beginPath();
+          ctx.ellipse(0,0, r*i*0.28, r*i*0.12, 0, 0, Math.PI*2);
+          ctx.strokeStyle = `rgba(0,229,255,${0.08*i})`;
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+          ctx.restore();
         }
-      }, 800);
-    });
-
-
-
-     document.addEventListener('DOMContentLoaded', () => {
-    const lazyVideos = document.querySelectorAll('.lazy-video');
-
-    function loadVideo(video) {
-      if (!video.dataset.src || video.src) return;
-
-      video.src = video.dataset.src;
-      video.load();
-
-      video.play().catch(() => {
-        // Browser may block autoplay sometimes, but muted videos usually work.
-      });
-    }
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        const video = entry.target;
-
-        if (entry.isIntersecting) {
-          loadVideo(video);
-          video.play().catch(() => {});
-        } else {
-          video.pause();
-        }
-      });
-    }, {
-      root: null,
-      rootMargin: '300px',
-      threshold: 0.01
-    });
-
-    lazyVideos.forEach(video => observer.observe(video));
-
-    const eagerVideos = document.querySelectorAll('.alien-video:not(.lazy-video)');
-
-    eagerVideos.forEach(video => {
-      video.play().catch(() => {});
-    });
-  });
+        // core
+        const grad = ctx.createRadialGradient(cx,cy,0,cx,cy,45);
+        grad.addColorStop(0,'rgba(0,229,255,0.9)');
+        grad.addColorStop(0.4,'rgba(0,100,200,0.5)');
+        grad.addColorStop(1,'transparent');
+        ctx.beginPath();
+        ctx.arc(cx,cy,45*(0.8+0.2*Math.sin(t*3)),0,Math.PI*2);
+        ctx.fillStyle = grad;
+        ctx.fill();
+        // outer ring
+        ctx.beginPath();
+        ctx.arc(cx,cy,r,0,Math.PI*2);
+        ctx.strokeStyle = `rgba(0,229,255,${0.2+0.1*Math.sin(t)})`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        requestAnimationFrame(draw);
+      }
+      draw();
+    })();
   </script>
 </body>
 </html>
