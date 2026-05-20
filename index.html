@@ -5,10 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mark // Full-Stack Developer · Systems Architect</title>
   <meta name="theme-color" content="#00050a" />
+  <!-- PERF: dns-prefetch for font origins -->
+  <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+  <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- PERF: font-display=swap prevents FOIT blocking render -->
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&family=Exo+2:ital,wght@0,100;0,400;0,700;1,400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/css/style.css" />
+  <!-- PERF: preload critical images -->
+  <link rel="preload" href="assets/images/profile_picture.webp" as="image" type="image/webp" />
   <style>
     /* ══════════════════════════════════════════════════════════════
        AI REACTOR CORE — CINEMATIC CENTER-PIECE
@@ -23,22 +29,24 @@
     }
     #reactor-canvas {
       width: 100%; height: 100%;
-      filter: drop-shadow(0 0 40px rgba(0,229,255,0.7)) drop-shadow(0 0 120px rgba(0,229,255,0.3)) drop-shadow(0 0 200px rgba(123,47,255,0.2));
-      animation: reactor-pulse-wrapper 4s ease-in-out infinite;
+      /* OPTIMIZED: single drop-shadow + opacity pulse instead of 4-layer filter chain */
+      filter: drop-shadow(0 0 30px rgba(0,229,255,0.65));
+      animation: reactor-pulse-wrapper 5s ease-in-out infinite;
     }
     @keyframes reactor-pulse-wrapper {
-      0%,100% { filter: drop-shadow(0 0 40px rgba(0,229,255,0.7)) drop-shadow(0 0 120px rgba(0,229,255,0.3)) drop-shadow(0 0 200px rgba(123,47,255,0.2)); }
-      50%      { filter: drop-shadow(0 0 80px rgba(0,229,255,1)) drop-shadow(0 0 200px rgba(0,229,255,0.5)) drop-shadow(0 0 300px rgba(123,47,255,0.4)) drop-shadow(0 0 400px rgba(0,255,65,0.2)); }
+      0%,100% { opacity: 0.9; }
+      50%      { opacity: 1; filter: drop-shadow(0 0 50px rgba(0,229,255,0.95)) drop-shadow(0 0 90px rgba(0,229,255,0.3)); }
     }
 
     /* ── HUD STATUS PANELS ─── */
     .hud-panel {
       position: absolute; padding: .55rem .9rem;
-      background: rgba(0,8,18,0.92);
+      background: rgba(0,8,18,0.94);
       border: 1px solid rgba(0,229,255,0.2);
       font-family: 'Share Tech Mono', monospace; font-size: .58rem;
       color: var(--cyan); letter-spacing: .1em; line-height: 1.9;
-      backdrop-filter: blur(10px);
+      /* OPTIMIZED: reduced blur radius */
+      backdrop-filter: blur(6px);
     }
     .hud-panel::before {
       content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
@@ -49,8 +57,8 @@
     .hud-panel .hp-label { color: var(--muted); font-size: .52rem; letter-spacing: .2em; }
     .hud-panel .hp-val   { color: var(--green); }
     .hud-panel .hp-bar   { width: 100%; height: 3px; background: rgba(0,229,255,0.12); margin-top: 2px; }
-    .hud-panel .hp-fill  { height: 100%; background: linear-gradient(90deg, var(--green), var(--cyan)); box-shadow: 0 0 8px var(--cyan); animation: hud-fill 2s ease-in-out infinite alternate; }
-    @keyframes hud-fill   { from { opacity: .7; } to { opacity: 1; box-shadow: 0 0 20px var(--cyan); } }
+    .hud-panel .hp-fill  { height: 100%; background: linear-gradient(90deg, var(--green), var(--cyan)); animation: hud-fill 2.5s ease-in-out infinite alternate; }
+    @keyframes hud-fill   { from { opacity: .65; } to { opacity: 1; } }
 
     /* ── SECTION TOP ENERGY LINES ── */
     section::before {
@@ -65,6 +73,8 @@
       0%,100% { opacity: 0; transform: scaleX(0.7); }
       50%      { opacity: 1; transform: scaleX(1); }
     }
+    /* OPTIMIZED: animation slowed to 7s to reduce paint frequency */
+    section::before { animation: section-top-line 7s ease-in-out infinite; animation-delay: calc(var(--sec-delay,0) * 1s); }
 
     /* ── CORNER BRACKETS ── */
     section > .sec-corner { position: absolute; width: 22px; height: 22px; border-color: rgba(0,229,255,0.35); border-style: solid; pointer-events: none; z-index: 3; transition: all .5s; }
@@ -152,6 +162,8 @@
       0%   { filter: hue-rotate(0deg); }
       100% { filter: hue-rotate(360deg); }
     }
+    /* OPTIMIZED: slowed to 8s (was 5s) — less GPU paint frequency */
+    .banner-grad-border { animation: border-glow-cycle 8s linear infinite; }
 
     /* ── GHOST BUTTON ── */
     .btn-ghost {
@@ -163,20 +175,19 @@
     }
     .btn-ghost:hover {
       border-color: var(--cyan); color: var(--cyan);
-      box-shadow: 0 0 30px rgba(0,229,255,0.3), inset 0 0 20px rgba(0,229,255,0.05);
+      box-shadow: 0 0 20px rgba(0,229,255,0.25);
     }
 
     /* ── NEON FRAME PULSE ── */
+    /* OPTIMIZED: neon-frame is now static — no pulsing box-shadow animation.
+       Glow activates only on :hover via CSS transition. Zero idle paint cost. */
     .neon-frame {
       position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
-      box-shadow: inset 0 0 0 1px rgba(0,229,255,0.18);
-      animation: neon-frame-pulse 3s ease-in-out infinite;
+      box-shadow: inset 0 0 0 1px rgba(0,229,255,0.15);
+      transition: box-shadow .3s;
     }
-    @keyframes neon-frame-pulse {
-      0%,100% { box-shadow: inset 0 0 0 1px rgba(0,229,255,0.18), 0 0 20px rgba(0,229,255,0.05); }
-      50%      { box-shadow: inset 0 0 0 1px rgba(0,229,255,0.45), 0 0 60px rgba(0,229,255,0.15), inset 0 0 40px rgba(0,229,255,0.04); }
-    }
-
+    .project-card:hover .neon-frame,
+    .banner .neon-frame { box-shadow: inset 0 0 0 1px rgba(0,229,255,0.5); }
     /* ── CHROMATIC SHOCKWAVE on section enter ── */
     .sec-shockwave {
       position: absolute; top: 50%; left: 50%;
@@ -190,14 +201,14 @@
       100% { width: 600px; height: 600px; opacity: 0; border-color: var(--green); }
     }
 
-    /* ── LIVE ENERGY SCAN LINE ── */
+    /* ── LIVE ENERGY SCAN LINE — OPTIMIZED: removed box-shadow, slowed to 10s ── */
     .scan-line {
       position: absolute; left: 0; right: 0; height: 2px; pointer-events: none; z-index: 4;
       background: linear-gradient(90deg, transparent, var(--cyan), var(--green), transparent);
-      opacity: 0.5; box-shadow: 0 0 12px var(--cyan), 0 0 30px rgba(0,229,255,0.3);
-      animation: scan-sweep 8s linear infinite;
+      opacity: 0.4;
+      animation: scan-sweep 10s linear infinite;
     }
-    @keyframes scan-sweep { 0% { top: -2px; opacity: 0.7; } 100% { top: 100%; opacity: 0; } }
+    @keyframes scan-sweep { 0% { top: -2px; opacity: 0.6; } 100% { top: 100%; opacity: 0; } }
 
     /* ── RESPONSIVE ── */
     @media (max-width: 900px) {
@@ -567,7 +578,7 @@
       <div class="project-card reveal" data-hex="0xF2A1" style="animation-delay:.3s">
         <div class="neon-frame"></div>
         <a href="https://www.philbritish.com/" target="_blank" class="project-img-wrap">
-          <img src="assets/images/102.webp" alt="PhilBritish Insurance" class="project-img" />
+          <img src="assets/images/102.webp" alt="PhilBritish Insurance" class="project-img" loading="lazy" decoding="async" />
           <div class="project-scan"></div>
         </a>
 
@@ -590,7 +601,7 @@
       <div class="project-card reveal" data-hex="0xE3D5" style="animation-delay:.4s">
         <div class="neon-frame"></div>
         <a href="https://jinxi.blitzworx2.com/" target="_blank" class="project-img-wrap">
-          <img src="assets/images/105.webp" alt="JPDC" class="project-img" />
+          <img src="assets/images/105.webp" alt="JPDC" class="project-img" loading="lazy" decoding="async" />
           <div class="project-scan"></div>
         </a>
 
@@ -613,7 +624,7 @@
       <div class="project-card reveal" data-hex="0xB8F0" style="animation-delay:.5s">
         <div class="neon-frame"></div>
         <a href="https://cvskinshop.com" target="_blank" class="project-img-wrap">
-          <img src="assets/images/106.webp" alt="CV Skin Shop" class="project-img" />
+          <img src="assets/images/106.webp" alt="CV Skin Shop" class="project-img" loading="lazy" decoding="async" />
           <div class="project-scan"></div>
         </a>
 
@@ -636,7 +647,7 @@
       <div class="project-card reveal" data-hex="0x4A9C" style="animation-delay:.6s">
         <div class="neon-frame"></div>
         <a href="https://www.lynkxs.com/" target="_blank" class="project-img-wrap">
-          <img src="assets/images/107.webp" alt="LynkXS" class="project-img" />
+          <img src="assets/images/107.webp" alt="LynkXS" class="project-img" loading="lazy" decoding="async" />
           <div class="project-scan"></div>
         </a>
 
@@ -659,7 +670,7 @@
       <div class="project-card reveal" data-hex="0x2E7F" style="animation-delay:.7s">
         <div class="neon-frame"></div>
         <a href="https://play.google.com/store/apps/details?id=com.myoptimind.ecoikot" target="_blank" class="project-img-wrap">
-          <img src="assets/images/108.webp" alt="Eco-Ikot App" class="project-img" />
+          <img src="assets/images/108.webp" alt="Eco-Ikot App" class="project-img" loading="lazy" decoding="async" />
           <div class="project-scan"></div>
         </a>
 
@@ -682,7 +693,7 @@
       <div class="project-card reveal" data-hex="0x91FF" style="animation-delay:.8s">
         <div class="neon-frame"></div>
         <a href="https://boxituppkg.com/" target="_blank" class="project-img-wrap">
-          <img src="assets/images/109.webp" alt="BoxitUp Packaging" class="project-img" />
+          <img src="assets/images/109.webp" alt="BoxitUp Packaging" class="project-img" loading="lazy" decoding="async" />
           <div class="project-scan"></div>
         </a>
 
@@ -842,7 +853,7 @@
       <div class="blog-grid">
         <div class="blog-card reveal">
           <div class="blog-img-wrap">
-            <img src="assets/images/blog1.webp" alt="PTDID Integration Day" class="blog-img" />
+            <img src="assets/images/blog1.webp" alt="PTDID Integration Day" class="blog-img" loading="lazy" decoding="async" />
             <div class="blog-scan"></div>
             <div class="blog-meta">
               <span class="blog-date">2026-05-05</span>
@@ -857,7 +868,7 @@
 
         <div class="blog-card reveal" style="animation-delay:.2s">
           <div class="blog-img-wrap">
-            <img src="assets/images/blog2.webp" alt="Training Session" class="blog-img" />
+            <img src="assets/images/blog2.webp" alt="Training Session" class="blog-img" loading="lazy" decoding="async" />
             <div class="blog-scan"></div>
             <div class="blog-meta">
               <span class="blog-date">2026-04-27</span>
@@ -967,23 +978,21 @@
     }
     setInterval(updateClock, 1000); updateClock();
 
-    /* ── HUD mouse coords ── */
+    /* ── HUD mouse coords — throttled with rAF ── */
+    let _hudRaf = false;
     document.addEventListener('mousemove', e => {
-      const xEl = document.getElementById('hud-x');
-      const yEl = document.getElementById('hud-y');
-      if (xEl) xEl.textContent = 'X: ' + String(e.clientX).padStart(4, '0');
-      if (yEl) yEl.textContent = 'Y: ' + String(e.clientY).padStart(4, '0');
+      if (_hudRaf) return;
+      _hudRaf = true;
+      requestAnimationFrame(() => {
+        _hudRaf = false;
+        const xEl = document.getElementById('hud-x');
+        const yEl = document.getElementById('hud-y');
+        if (xEl) xEl.textContent = 'X: ' + String(e.clientX).padStart(4, '0');
+        if (yEl) yEl.textContent = 'Y: ' + String(e.clientY).padStart(4, '0');
+      });
     }, { passive: true });
 
-    /* ── HUD section ── */
-    const secNames = { home: 'HOME', about: 'PROFILE', projects: 'PROJECTS', tech: 'STACK', blog: 'LOGS', contact: 'CONTACT' };
-    window.addEventListener('scroll', () => {
-      const secs = document.querySelectorAll('section[id]');
-      let cur = 'HOME';
-      secs.forEach(s => { if (window.scrollY >= s.offsetTop - 130) cur = secNames[s.id] || s.id.toUpperCase(); });
-      const el = document.getElementById('hud-section');
-      if (el) el.textContent = 'SEC: ' + cur;
-    }, { passive: true });
+    /* ── HUD section — handled by main.js updateHudSection() ── */
 
     /* ── Remove loader ── */
     window.addEventListener('load', () => {
@@ -993,61 +1002,9 @@
       }, 1200);
     });
 
-    /* ── Engineer output and signal HUD animate ── */
-    const bars = ['▁▂▃▅▇▅▃▂','▂▄▆▇▆▄▂▁','▃▅▇▆▄▂▁▂','▅▇▆▃▂▄▆▇','▇▆▄▂▁▃▅▇'];
-    let bi = 0;
-    setInterval(() => {
-      if (document.documentElement.classList.contains('is-scrolling')) return;
-      const el = document.getElementById('eng-output');
-      if (el) el.textContent = bars[bi++ % bars.length];
-      const sig = document.getElementById('signal-val');
-      if (sig) sig.textContent = '███ ' + (9.4 + Math.random() * 0.8).toFixed(1) + 'GHz';
-    }, 400);
+    /* ── Engineer output and signal HUD animate — handled by main.js §25 ── */
 
-    /* ── CONTACT REACTOR small orb ── */
-    (function() {
-      const cv = document.getElementById('contact-reactor');
-      if (!cv) return;
-      const ctx = cv.getContext('2d');
-      const cx = 140, cy = 140, r = 90;
-      let t = 0;
-      function draw() {
-        if (!document.documentElement.classList.contains('is-scrolling')) {
-        ctx.clearRect(0,0,280,280);
-        t += 0.018;
-        // rings
-        for (let i = 4; i >= 1; i--) {
-          const a = (t * i * 0.5) % (Math.PI * 2);
-          ctx.save();
-          ctx.translate(cx,cy);
-          ctx.rotate(a);
-          ctx.beginPath();
-          ctx.ellipse(0,0, r*i*0.28, r*i*0.12, 0, 0, Math.PI*2);
-          ctx.strokeStyle = `rgba(0,229,255,${0.08*i})`;
-          ctx.lineWidth = 1.5;
-          ctx.stroke();
-          ctx.restore();
-        }
-        // core
-        const grad = ctx.createRadialGradient(cx,cy,0,cx,cy,45);
-        grad.addColorStop(0,'rgba(0,229,255,0.9)');
-        grad.addColorStop(0.4,'rgba(0,100,200,0.5)');
-        grad.addColorStop(1,'transparent');
-        ctx.beginPath();
-        ctx.arc(cx,cy,45*(0.8+0.2*Math.sin(t*3)),0,Math.PI*2);
-        ctx.fillStyle = grad;
-        ctx.fill();
-        // outer ring
-        ctx.beginPath();
-        ctx.arc(cx,cy,r,0,Math.PI*2);
-        ctx.strokeStyle = `rgba(0,229,255,${0.2+0.1*Math.sin(t)})`;
-        ctx.lineWidth = 1;
-        ctx.stroke();
-        } // end !is-scrolling
-        requestAnimationFrame(draw);
-      }
-      draw();
-    })();
+    /* ── CONTACT REACTOR — handled by main.js §26 (visibility-aware, 30fps) ── */
   </script>
 </body>
 </html>
