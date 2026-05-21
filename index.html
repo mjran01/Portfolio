@@ -27,12 +27,34 @@
       pointer-events: none; z-index: 1;
       flex-shrink: 0;
     }
-    #reactor-canvas {
-      width: 100%; height: 100%;
-      /* OPTIMIZED: single drop-shadow + opacity pulse instead of 4-layer filter chain */
-      filter: drop-shadow(0 0 30px rgba(0,229,255,0.65));
-      animation: reactor-pulse-wrapper 5s ease-in-out infinite;
+
+    /* ── REACTOR BACKGROUND IMAGE ── */
+    #reactor-core-wrap::before {
+      content: '';
+      position: absolute;
+      inset: -20px;
+      background-image: url('assets/images/reactor-bg.webp');
+      background-size: cover;
+      background-position: center center;
+      border-radius: 50%;
+      opacity: 0.75;
+      z-index: 0;
+      pointer-events: none;
+      /* soft vignette mask so it bleeds into the banner naturally */
+      -webkit-mask-image: radial-gradient(circle, black 40%, transparent 75%);
+      mask-image: radial-gradient(circle, black 40%, transparent 75%);
+      margin-top: 20px;
     }
+
+
+   #reactor-canvas {
+        width: 100%; height: 100%;
+        filter: drop-shadow(0 0 30px rgba(0,229,255,0.65));
+        animation: reactor-pulse-wrapper 5s ease-in-out infinite;
+        position: relative;   /* ADD */
+        z-index: 1;           /* ADD */
+        mix-blend-mode: screen; /* ADD — makes black transparent, glows shine through */
+      }
     @keyframes reactor-pulse-wrapper {
       0%,100% { opacity: 0.9; }
       50%      { opacity: 1; filter: drop-shadow(0 0 50px rgba(0,229,255,0.95)) drop-shadow(0 0 90px rgba(0,229,255,0.3)); }
